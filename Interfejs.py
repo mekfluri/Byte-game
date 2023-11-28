@@ -1,6 +1,9 @@
 import string
 from collections import deque
 
+
+
+
 class Interfejs:
     def __init__(self):
         self.velicina_table = 0
@@ -29,6 +32,7 @@ class Interfejs:
             except ValueError:
                 print("Pogrešan unos. Molimo unesite ispravan broj.")
 
+
     def zapocni_igru(self):
         self.velicina_table = self.unesi_velicinu_table()
         self.tabla = [[' ' for _ in range(self.velicina_table)] for _ in range(self.velicina_table)]
@@ -36,9 +40,78 @@ class Interfejs:
         self.trenutni_igrac = prvi_igrac
 
         print(f"{self.igraci[self.trenutni_igrac]} igra prvi!")
+        return self.velicina_table
 
+    def kreiraj_tablu(self, velicina_table, graf):
+        for row in range(1, velicina_table + 1):
+            for col in range(1, velicina_table + 1):
+                square = f"{chr(96 + col)}{row}"  # Pretvara broj u slovo (1->a, 2->b, ..., 8->h)
+                graf.add_square(square, deque(['.'] * 8), square)
+
+    def number_to_letter(self, number):
+
+        ascii_value = ord('a') + number - 1
+        letter = chr(ascii_value)
+
+        return letter
+
+    #graf
+    def trenutni_prikaz_table(self, graf, velicina_table, user1, user2):
+        matrix = [['' for _ in range(velicina_table + 1)] for _ in range(velicina_table + 1)]
+        visited = []
+        matrix = graf.dfs_trenutno("a1", visited, matrix, velicina_table, user1, user2)
+
+        for i in range(velicina_table + 1):
+            for j in range(velicina_table + 1):
+                if j == 0:
+                    matrix[i][j] = deque(['.'] * 8)
+                    matrix[i][j].append(self.number_to_letter(i))
+
+                if i == 0:
+                    matrix[i][j] = deque(['.'] * 8)
+                    matrix[i][j].append(j)
+                if (matrix[i][j] == ''):
+                    matrix[i][j] = deque(['.'] * 8)
+                    matrix[i][j].append(0)
+
+
+                self.print_stack_matrix(matrix[i][j])
+
+
+            print('\n')
+
+
+
+    #graf
+    def inicijalni_prikaz_table(self, graf, velicina_table, user1, user2):
+        matrix = [['' for _ in range(velicina_table+1)] for _ in range(velicina_table+1)]
+        visited = []
+        matrix = graf.dfs("a1", visited, matrix, velicina_table, user1, user2)
+        for i in range(len(matrix)):
+          for j in range(len(matrix[i])):
+            print(f"matrica[{i}][{j}] = {matrix[i][j]}")
+
+        for i in range(velicina_table + 1):
+            for j in range(velicina_table +1):
+                if j == 0:
+                    matrix[i][j] = deque(['.'] * 8)
+                    matrix[i][j].append(self.number_to_letter(i))
+
+                if i == 0:
+                    matrix[i][j] = deque(['.'] * 8)
+                    matrix[i][j].append(j)
+                if (matrix[i][j] == ''):
+                    matrix[i][j] = deque(['.'] * 8)
+                    matrix[i][j].append(0)
+
+
+                self.print_stack_matrix(matrix[i][j])
+
+
+            print('\n')
 
     def unos_poteza(self):
+        #ovo mi sumnjivo, verovatno treba da se doda nesto?
         pozicija_polja = input("Unesite poziciju polja").upper()
         mesto_na_steku = input("Unesite mesto figure na steku")
         smer_pomeranja = input("Unesite smer pomeranja figure").upper()
@@ -46,7 +119,7 @@ class Interfejs:
 
 
 
-    def print_stack_matrix(self,stack,fleg):
+    def print_stack_matrix(self,stack):
         matrix1 = [[0] * 3 for _ in range(3)]
         stack_list = list(stack)
 
@@ -72,21 +145,14 @@ class Interfejs:
                for row in matrix1:
                   print(' '.join(map(str, row)), end=' ')
         else:
-            if(fleg == 0):
-              for _ in range(9):
-                 print(' ', end=' ')
-            else:
-                for row in matrix1:
-                    for i, element in enumerate(row):
-                        if i == len(row) - 1:
-                            if element == 0:
-                                print('.', end=' ')
-                            else:
-                                print(element, end=' ')
-                        else:
-                            print(element, end=' ')
+
+            for _ in range(9):
+               print(' ', end=' ')
 
 
+
+
+    #matrica
     def nacrtaj_pocetno_stanje(self, user1, user2):
         n = self.velicina_table +1
         m = self.velicina_table
@@ -114,13 +180,18 @@ class Interfejs:
             for j in range(n):
                 if (i == 1 and i % 2 != 0 and j % 2 != 0) or (i == m and i % 2 == 0 and j % 2 == 0):
 
-                    self.print_stack_matrix(matrix[i][j], 1)
+                    self.print_stack_matrix(matrix[i][j])
 
                 else:
-                    self.print_stack_matrix(matrix[i][j], 0)
+                    self.print_stack_matrix(matrix[i][j])
             print('\n')
 
 
+
+
+
+
+    #matrica
 
     def nacrtaj_trenutno_stanje(self, user1, user2):
         n = self.velicina_table + 1
