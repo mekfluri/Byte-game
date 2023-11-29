@@ -110,12 +110,42 @@ class Interfejs:
 
             print('\n')
 
+
+    def je_validno_polje(self,polje):
+        return polje[0] in string.ascii.lowercase and polje[1:].isdigit()
+
+    def je_validna_pozicija_steka(self, pozicija):
+        return pozicija.isdigit() and 1 <= int(pozicija) <= 8
+
+    def je_validan_smer(self, smer):
+        return smer.upper() in {'GORE', 'DOLJE', 'LEVO', 'DESNO'}
+
+    def je_validan_potez(self, polje , pozicija_steka, smer):
+
+        #da li je polje validno
+        if not self.je_validno_polje(polje):
+            print('Unesli ste neispravno polje.')
+            return False
+
+        #da li je pozicija steka validna
+        if not self.je_validna_pozicija_steka(pozicija_steka):
+            print('Pozicija stek nije validna.')
+            return False
+
+        #da li je smer validan
+        if not self.je_validan_smer(smer):
+            print("Smer nije validna.")
+            return False
+
     def unos_poteza(self):
-        #ovo mi sumnjivo, verovatno treba da se doda nesto?
+      while True:
         pozicija_polja = input("Unesite poziciju polja").upper()
         mesto_na_steku = input("Unesite mesto figure na steku")
         smer_pomeranja = input("Unesite smer pomeranja figure").upper()
 
+        if self.je_validan_potez(pozicija_polja,mesto_na_steku,smer_pomeranja):
+             #ovde implementiramo za izvrsavanje poteza, to je za drugu fazu
+              break
 
 
 
@@ -234,4 +264,26 @@ class Interfejs:
             print('\n')
 
 
+def proveri_kraj_igre(user1, user2, polje): #funkciju pozivamo nakon svakog poteza
+    # broj stekova koji je potreban za pobedu
+    broj_pobednickih_stekova = len(user1.stanja) // 2
+
+    # broj stekova koje je svaki igrač složio
+    broj_stekova_user1 = user1.broj_slozenih_stekova()
+    broj_stekova_user2 = user2.broj_slozenih_stekova()
+
+    # provera da li je igra završena
+    if broj_stekova_user1 > broj_pobednickih_stekova:
+        print("Čestitamo! Igrač X je pobednik!")
+        return True
+    elif broj_stekova_user2 > broj_pobednickih_stekova:
+        print("Čestitamo! Igrač O je pobednik!")
+        return True
+
+    # provera da li je tabla puna ili je nereseno
+    elif polje.is_tabla_puna():
+        print("Igra je završena nereseo.")
+        return True
+
+    return False
 

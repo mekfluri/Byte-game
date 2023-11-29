@@ -22,3 +22,9 @@ class User:
     def __str__(self):
         return f"User: {str(self.hashTable)}"
 
+    def broj_slozenih_stekova(self):
+        broj_slozenih = 0
+        for vrednost in self.stanja.values():
+            if vrednost != "PRAZNO" and len(vrednost) == 8:
+                broj_slozenih += 1
+        return broj_slozenih
