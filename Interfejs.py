@@ -166,24 +166,26 @@ class Interfejs:
 
 
 
-        for i in range(2, n-1):
+        for i in range(1, n):
             for j in range(1, n):
-                if i % 2 == 0 and j % 2 == 0:
+
+                if (i == 1 and j % 2 != 0) or (i == m and j % 2 == 0):
+                    matrix[i][j] = deque(['.'] * 9)
+                elif i % 2 == 0 and j % 2 == 0:
 
                     matrix[i][j].append('X')
                     user1.dodaj_stanje((i * 10 + j), matrix[i][j])
-                if i % 2 != 0 and j % 2 != 0:
+                elif i % 2 != 0 and j % 2 != 0:
                     matrix[i][j].append('O')
                     user2.dodaj_stanje((i * 10 + j), matrix[i][j])
 
         for i in range(n):
             for j in range(n):
-                if (i == 1 and i % 2 != 0 and j % 2 != 0) or (i == m and i % 2 == 0 and j % 2 == 0):
 
-                    self.print_stack_matrix(matrix[i][j])
 
-                else:
-                    self.print_stack_matrix(matrix[i][j])
+                self.print_stack_matrix(matrix[i][j])
+
+
             print('\n')
 
 
@@ -203,24 +205,30 @@ class Interfejs:
         for i, letter in enumerate(string.ascii_uppercase[:n - 1]):
             matrix[i + 1][0].append(letter)
 
-        for i in range(2, n - 1):
-            for j in range(1, n):
-               que =  user1.vrati_stanje(i*10+j)
-               if que != "PRAZNO":
-                   matrix[i][j] = que
 
-               que = user2.vrati_stanje(i * 10 + j)
-               if que != "PRAZNO":
-                   matrix[i][j] = que
+        user2.prikazi_stanje()
+        for i in range(1, n):
+            for j in range(1, n):
+              if(i+j) % 2 == 0:
+                que1 =  user1.vrati_stanje(i*10+j)
+                if que1 != "PRAZNO":
+                    matrix[i][j] = que1
+
+                que2 = user2.vrati_stanje(i * 10 + j)
+                if que2 != "PRAZNO":
+                    matrix[i][j] = que2
+
+                if( que1 == "PRAZNO" and que2 == "PRAZNO"):
+                    matrix[i][j] = deque(['.'] * 9)
+        for i in range(len(matrix)):
+            for j in range(len(matrix[i])):
+                print(f"matrica[{i}][{j}] = {matrix[i][j]}")
+
 
         for i in range(n):
             for j in range(n):
-                    if (i == 1 and i % 2 != 0 and j % 2 != 0) or (i == m and i % 2 == 0 and j % 2 == 0):
 
-                       self.print_stack_matrix(matrix[i][j], 1)
-
-                    else:
-                        self.print_stack_matrix(matrix[i][j], 0)
+                self.print_stack_matrix(matrix[i][j])
 
 
             print('\n')
