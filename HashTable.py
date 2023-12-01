@@ -33,50 +33,39 @@ class HashTable:
         
         hashed_key = hash(key) % self.size
 
-        # Get the bucket corresponding to index
+
         bucket = self.hash_table[hashed_key]
 
         found_key = False
         for index, record in enumerate(bucket):
             record_key, record_val = record
 
-            # check if the bucket has same key as
-            # the key being searched
+
             if record_key == key:
                 found_key = True
                 break
 
-        # If the bucket has same key as the key being searched,
-        # Return the value found
-        # Otherwise indicate there was no record found
+
         if found_key:
             return record_val
         else:
             return "PRAZNO"
 
-    # Remove a value with specific key
+
     def delete_val(self, key):
 
-        # Get the index from the key using
-        # hash function
         hashed_key = hash(key) % self.size
 
-        # Get the bucket corresponding to index
         bucket = self.hash_table[hashed_key]
 
         found_key = False
         for index, record in enumerate(bucket):
             record_key, record_val = record
-
-            # check if the bucket has same key as
-            # the key to be deleted
             if record_key == key:
                 found_key = True
                 break
         if found_key:
             bucket.pop(index)
         return
-
-    # To print the items of hash map
     def __str__(self):
         return "".join(str(item) for item in self.hash_table)
