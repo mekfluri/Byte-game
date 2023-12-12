@@ -13,12 +13,15 @@ from User import User
 def main():
     interfejs = Interfejs()
     velicinaTable = interfejs.zapocni_igru()
-    interfejs.nacrtaj_trenutno_stanje()
-    #interfejs.unos_poteza()
-    #interfejs.najblizi_element()
-    chessboard = Chessboard()
-    #interfejs.najkraci_put()
-    #interfejs.validan_potez()
+    user1, user2 = interfejs.vrati_korisnike()
+    tabla = interfejs.vrati_tablu()
+
+    while not interfejs.proveri_kraj_igre(user1,user2,tabla):
+      interfejs.unos_poteza()
+      interfejs.najblizi_element()
+      chessboard = Chessboard()
+      interfejs.najkraci_put()
+      interfejs.validan_potez()
 
 if __name__ == "__main__":
     main()

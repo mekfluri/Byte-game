@@ -1,11 +1,11 @@
 from collections import deque
-
 from HashTable import HashTable
 
-
 class User:
-    def __init__(self, hash_table_size):
-        self.hashTable = HashTable(hash_table_size)
+    def __init__(self, is_human):
+
+        self.is_human = is_human
+        self.stanja = deque()
 
     def dodaj_stanje(self, broj, stek):
         self.hashTable.set_val(broj, stek)
@@ -24,7 +24,7 @@ class User:
 
     def broj_slozenih_stekova(self):
         broj_slozenih = 0
-        for vrednost in self.stanja.values():
+        for vrednost in self.stanja:
             if vrednost != "PRAZNO" and len(vrednost) == 8:
                 broj_slozenih += 1
         return broj_slozenih
