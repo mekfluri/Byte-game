@@ -144,16 +144,16 @@ class Interfejs:
         i = self.letter_to_number(pozicija[0])
         j = int(pozicija[1])
         element = self.vrati_stanje(i * 10 + j)
-        if 0 <= i < self.velicina_table and 0 <= j < self.velicina_table:
+        if 0 <= i <= self.velicina_table and 0 <= j <= self.velicina_table:
             dijagonalni_elementi = []
 
             if i > 0 and j > 0:
                 dijagonalni_elementi.append([self.vrati_stanje((i - 1) * 10 + (j - 1)), "GL",((i - 1) * 10 + (j - 1))])
-            if i > 0 and j < self.velicina_table - 1:
+            if i > 0 and j < self.velicina_table:
                 dijagonalni_elementi.append([self.vrati_stanje((i - 1) * 10 + (j + 1)), "GD", ((i - 1) * 10 + (j + 1))])
-            if i < self.velicina_table - 1 and j > 0:
+            if i < self.velicina_table  and j > 0:
                 dijagonalni_elementi.append([self.vrati_stanje((i + 1) * 10 + (j - 1)), "DL", ((i + 1) * 10 + (j - 1))])
-            if i < self.velicina_table - 1 and j < self.velicina_table - 1:
+            if i < self.velicina_table  and j < self.velicina_table:
                 dijagonalni_elementi.append([self.vrati_stanje((i + 1) * 10 + (j + 1)), "DD", ((i + 1) * 10 + (j + 1))])
 
         print(dijagonalni_elementi)
