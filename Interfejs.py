@@ -353,8 +353,9 @@ class Interfejs:
         visina_drugog_steka = len(polje2)
 
 
-        indeks = int(self.mesto_na_steku) +1
-        elementi_od_pocetka_do_mesta = (list(polje1)[:indeks])
+        indeks = int(self.mesto_na_steku)
+        #pajton koristi indeksiranje od 0
+        elementi_od_pocetka_do_mesta = (list(polje1)[indeks:])
         visina_steka_za_premestanje = len(elementi_od_pocetka_do_mesta)
 
         if (visina_drugog_steka + visina_steka_za_premestanje > 8):
@@ -365,10 +366,17 @@ class Interfejs:
                 for element in reversed(elementi_od_pocetka_do_mesta):
                     polje2.appendleft(element)
                 duzinaPolja2 = len(polje2)
+                if(duzinaPolja2 < 9):
+                    for i in range(0, 9-duzinaPolja2):
+                        polje2.appendleft('.')
                 print(polje2)
                 polje1.rotate(-int(self.mesto_na_steku))
-                for _ in range(int(self.mesto_na_steku) + 1):
+                for _ in range(0, len(elementi_od_pocetka_do_mesta)):
                     polje1.popleft()
+                duzinaPolja1 = len(polje1)
+                if (duzinaPolja1 < 9):
+                    for i in range(0, 9 - duzinaPolja1):
+                        polje1.appendleft('.')
                 print(polje1)
                 self.menjaj_stanje_igre(indeks1, polje1, indeks2, polje2)
             else:
@@ -378,7 +386,7 @@ class Interfejs:
         self.obrisi_stanje(pozicija1)
         self.obrisi_stanje(pozicija2)
         self.dodaj_stanje(pozicija1, stek1)
-        self.dodaj_stanje(pozicija1, stek2)
+        self.dodaj_stanje(pozicija2, stek2)
 
     def nacrtaj_pocetno_stanje(self):
         n = self.velicina_table +1
