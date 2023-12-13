@@ -17,11 +17,10 @@ def main():
     tabla = interfejs.vrati_tablu()
 
     while not interfejs.proveri_kraj_igre(user1,user2,tabla):
-      interfejs.unos_poteza()
-      interfejs.najblizi_element()
-      chessboard = Chessboard()
-      interfejs.najkraci_put()
-      interfejs.validan_potez()
+      interfejs.odigraj_potez()
+
+
+
 
 if __name__ == "__main__":
     main()

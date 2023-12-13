@@ -2,10 +2,11 @@ from collections import deque
 from HashTable import HashTable
 
 class User:
-    def __init__(self, is_human):
+    def __init__(self, is_human,oznaka):
 
         self.is_human = is_human
         self.stanja = deque()
+        self.oznaka=oznaka
 
     def dodaj_stanje(self, broj, stek):
         self.hashTable.set_val(broj, stek)
