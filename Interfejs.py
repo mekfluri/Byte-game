@@ -385,6 +385,7 @@ class Interfejs:
     def menjaj_stanje_igre(self, pozicija1, stek1, pozicija2, stek2):
         self.obrisi_stanje(pozicija1)
         self.obrisi_stanje(pozicija2)
+
         self.dodaj_stanje(pozicija1, stek1)
         self.dodaj_stanje(pozicija2, stek2)
 
