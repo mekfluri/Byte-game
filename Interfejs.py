@@ -90,14 +90,26 @@ class Interfejs:
 
     def je_validno_polje(self, polje):
         if polje[0] in string.ascii_uppercase and polje[1:].isdigit():
+            if self.je_prazno_polje(polje):
+                if self.ima_vise_nepraznih_suseda(polje):
+                    return False
             return True
+        return False
+
+    def je_validna_pozicija_steka(self, pozicija, og):
+        p = self.vrati_vrednost(self.letter_to_number(og[0]), int(og[1]))
+
+        if p[int(pozicija)] == self.trenutni_igrac or p[int(pozicija)] == '.':
+            if pozicija.isdigit() and 0 <= int(pozicija) <= 7:
+                if 9 - p.count('.') <= int(pozicija):
+                    return True
+                else:
+                    return False
+            else:
+                return False
         else:
+            print("To nije vasa figura i ne mozete je pomeriti! Izaberite drugu!")
             return False
-    def je_validna_pozicija_steka(self, pozicija):
-       if(pozicija.isdigit() and 0 <= int(pozicija) <= 7):
-           return True
-       else:
-           return False
 
     def je_validan_smer(self, smer, pozicija_polja):
         if(smer.upper() in {'GL', 'DL', 'GD', 'DD'}):
@@ -122,13 +134,11 @@ class Interfejs:
             print('Unesli ste neispravno polje.')
             return False
 
-
-        if not self.je_validna_pozicija_steka(pozicija_steka):
-            print('Pozicija stek nije validna.')
+        if not self.je_validna_pozicija_steka(8-int(pozicija_steka), polje):
             return False
 
         if not self.je_validan_smer(smer,polje):
-            print("Smer nije validna.")
+            print("Smer nije validan.")
             return False
 
     def letter_to_number(self, letter):
@@ -155,7 +165,7 @@ class Interfejs:
             if i < self.velicina_table  and j < self.velicina_table:
                 dijagonalni_elementi.append([self.vrati_stanje((i + 1) * 10 + (j + 1)), "DD", ((i + 1) * 10 + (j + 1))])
 
-        print(dijagonalni_elementi)
+
         list = []
         lista_punih = []
         for polje in dijagonalni_elementi:
@@ -460,24 +470,21 @@ class Interfejs:
             print('\n')
 
     def proveri_kraj_igre(self,user1, user2, polje): #funkciju pozivamo nakon svakog poteza
-        # broj stekova koji je potreban za pobedu
-        broj_pobednickih_stekova=2
+        dimenzija=self.velicina_table
+        broj_figura=(dimenzija-2)*dimenzija/2
+        broj_pobednickih_stekova=broj_figura//8
         # broj stekova koje je svaki igrač složio
         broj_stekova_user1 = user1.broj_slozenih_stekova(polje)
         broj_stekova_user2 = user2.broj_slozenih_stekova(polje)
 
-        # provera da li je igra završena
-        if broj_stekova_user1 > broj_pobednickih_stekova:
-             print("Čestitamo! Igrač X je pobednik!")
-             return True
-        elif broj_stekova_user2 > broj_pobednickih_stekova:
-             print("Čestitamo! Igrač O je pobednik!")
-             return True
+        if broj_pobednickih_stekova % 2 != 0:
+            if  broj_stekova_user1 > broj_pobednickih_stekova // 2:
+                print("Čestitamo! Pobedio je korisnik 'X'!")
+                return True
+            if broj_stekova_user2  > broj_pobednickih_stekova // 2:
+                print("Čestitamo! Pobedio je korisnik 'Y'!")
+                return True
 
-        # provera da li je tabla puna ili je nereseno
-        #elif polje.is_tabla_puna():
-            # print("Igra je završena nereseo.")
-           #  return True
 
         return False
 
@@ -519,40 +526,7 @@ class Interfejs:
         self.nacrtaj_trenutno_stanje()
         print(f"Na potezu je {self.igraci[self.trenutni_igrac]}")
 
-    def proveri_kraj_i_odredi_pobednika(self):
-        if self.proveri_kraj_igre():
-            if self.trenutni_igrac == 'X':
-                print("Čestitamo! Igrač X je pobednik!")
-            else:
-                print("Čestitamo! Igrač O je pobednik!")
-            return True
-        elif self.tabla.is_tabla_puna():
-            print("Igra je završena nereseo.")
-            return True
-        return False
 
-    def vrednost_pozicije(self,tabla):  #brisi ovo
-        # Brojači stekova za svakog igrača
-        stekovi_igrac1 = 0
-        stekovi_igrac2 = 0
-
-        for i in range(tabla.velicina()):
-            for j in range(tabla.velicina()):
-                polje = tabla.vrati_vrednost((i, j))
-                if polje == 'X':
-                    stekovi_igrac1 += 1
-                elif polje == 'O':
-                    stekovi_igrac2 += 1
-
-        # Ukoliko je igrač 1 (X) u vlasništvu više od polovine stekova, dodeljuje se pozitivna vrednost
-        # Ukoliko je igrač 2 (O) u vlasništvu više od polovine stekova, dodeljuje se negativna vrednost
-        razlika_stekova = stekovi_igrac1 - stekovi_igrac2
-        if razlika_stekova > 0:
-            return 1
-        elif razlika_stekova < 0:
-            return -1
-        else:
-            return 0  # Neriješeno stanje
 
     def moguci_potezi_igraca(self,tabla,lokacijaIgraca):
         moguci_potezi = []
@@ -688,50 +662,17 @@ class Interfejs:
         if count==9:
             return True
         else: return False
-    def polje_sused(self, polje):
-        if polje[0] in string.ascii_uppercase and polje[1:].isdigit():
-            if self.je_prazno_polje(polje):
-                if self.ima_vise_nepraznih_suseda(polje):
-                    return False
-            return True
-        return False
 
-    def stek_sused(self, pozicija, og):
-        if pozicija.isdigit() and 0 <= int(pozicija) <= 7:
-            p = self.vrati_vrednost(self.letter_to_number(og[0]), int(og[1]))
 
-            if 9-p.count('.')<=int(pozicija):
-                return True
-            else:
-                return False
-        else:
-            return False
 
-    def smer_sused(self, smer, pozicija_polja):
-        if (smer.upper() in {'GL', 'DL', 'GD', 'DD'}):
-            if (self.pozicija_polja.startswith('A')):
-                if (smer == 'GL' or smer == 'GD'):
-                    return False
-            if (self.pozicija_polja.startswith(self.number_to_letter(self.velicina_table))):
-                if (smer == 'DL' or smer == 'DD'):
-                    return False
-            if (self.pozicija_polja.__contains__('1')):
-                if (smer == 'GL' or smer == 'DL'):
-                    return False
-            if (self.pozicija_polja.__contains__(str(self.velicina_table))):
-                if (smer == 'GD' or smer == 'DD'):
-                    return False
-            return True
-        else:
-            return False
 
     def validan_sused(self, polje, pozicija_steka, smer,og):
-        if not self.polje_sused(polje):
+        if not self.je_validno_polje(polje):
             return False
 
-        if not self.stek_sused(pozicija_steka,og):
+        if not self.je_validna_pozicija_steka(pozicija_steka,og):
             return False
 
-        if not self.smer_sused(smer, og):
+        if not self.je_validan_smer(smer, og):
             return False
         return True
