@@ -23,9 +23,9 @@ class Interfejs:
         self.user1 = None
         self.user2 = None
 
-
     def dodaj_stanje(self, broj, stek):
         self.trenutno_stanje.set_val(broj, stek)
+
 
     def vrati_stanje(self, broj):
         return self.trenutno_stanje.get_val(broj)
@@ -48,8 +48,10 @@ class Interfejs:
                 if izbor == 'C1':
                     self.trenutni_igrac = self.user1.oznaka
 
+
                 elif izbor == 'C2':
                     self.trenutni_igrac = self.user2.oznaka
+
 
 
                 print(f"self.trenutni_igrac: {self.trenutni_igrac}")
@@ -75,10 +77,7 @@ class Interfejs:
     def zapocni_igru(self):
         self.velicina_table = self.unesi_velicinu_table()
         self.tabla = [[' ' for _ in range(self.velicina_table)] for _ in range(self.velicina_table)]
-
         self.izaberi_ko_prvi_igra()
-
-        self.nacrtaj_pocetno_stanje()
         return self.velicina_table
 
 
@@ -161,16 +160,28 @@ class Interfejs:
         lista_punih = []
         for polje in dijagonalni_elementi:
             if(polje[0] == "PRAZNO"):
-                print("Prazno polje" + " " + polje[1])
                 list.append(polje[1])
             else:
                 lista_punih.append(polje)
         return [list, lista_punih]
 
+    def ima_vise_nepraznih_suseda(self, pozicija):
+        susedna_polja = self.proveri_susedna_polja(pozicija)
 
+        neprazna_susedna_polja = [sused for sused in susedna_polja[1] if sused[0] != "PRAZNO" and sused[0] != "."]
+
+        if len(neprazna_susedna_polja)+1 >0:
+            return True
+        else:
+            return False
 
     def unos_poteza(self):
         self.pozicija_polja = input("Unesite poziciju polja:").upper()
+
+        print("Ovo su svi moguci potezi, koje mozete odigrati")
+
+        self.moguci_potezi_igraca(self.vrati_tablu(),self.pozicija_polja)
+
         self.mesto_na_steku = input("Unesite mesto figure na steku:")
         self.smer_pomeranja = input("Unesite smer pomeranja figure:").upper()
 
@@ -385,7 +396,6 @@ class Interfejs:
     def menjaj_stanje_igre(self, pozicija1, stek1, pozicija2, stek2):
         self.obrisi_stanje(pozicija1)
         self.obrisi_stanje(pozicija2)
-
         self.dodaj_stanje(pozicija1, stek1)
         self.dodaj_stanje(pozicija2, stek2)
 
@@ -439,6 +449,8 @@ class Interfejs:
                     matrix[i][j] = deque(['.'] * 9)
                 else:
                     matrix[i][j] = que1
+
+        self.tabla=matrix
         for i in range(n):
             for j in range(n):
 
@@ -449,11 +461,10 @@ class Interfejs:
 
     def proveri_kraj_igre(self,user1, user2, polje): #funkciju pozivamo nakon svakog poteza
         # broj stekova koji je potreban za pobedu
-        broj_pobednickih_stekova = (self.velicina_table // 2) * (self.velicina_table // 3)
-
+        broj_pobednickih_stekova=2
         # broj stekova koje je svaki igrač složio
-        broj_stekova_user1 = user1.broj_slozenih_stekova()
-        broj_stekova_user2 = user2.broj_slozenih_stekova()
+        broj_stekova_user1 = user1.broj_slozenih_stekova(polje)
+        broj_stekova_user2 = user2.broj_slozenih_stekova(polje)
 
         # provera da li je igra završena
         if broj_stekova_user1 > broj_pobednickih_stekova:
@@ -470,14 +481,16 @@ class Interfejs:
 
         return False
 
+
+
     def is_tabla_puna(self):
         for i in range(1, self.velicina_table + 1):
             for j in range(1, self.velicina_table + 1):
                 if self.matrix[i - 1][j][0] == '.':
                     return False
         return True
+
     def odigraj_potez(self):
-      while True:
         if(self.unos_poteza()!=False):  #Provera da li je unos validan
             susedna_polja = self.proveri_susedna_polja(self.pozicija_polja)
             if len(susedna_polja[0]) == 4:
@@ -518,7 +531,7 @@ class Interfejs:
             return True
         return False
 
-    def vrednost_pozicije(self,tabla):
+    def vrednost_pozicije(self,tabla):  #brisi ovo
         # Brojači stekova za svakog igrača
         stekovi_igrac1 = 0
         stekovi_igrac2 = 0
@@ -541,19 +554,21 @@ class Interfejs:
         else:
             return 0  # Neriješeno stanje
 
-    def moguci_potezi_igraca(self,tabla, igrac):
+    def moguci_potezi_igraca(self,tabla,lokacijaIgraca):
         moguci_potezi = []
+        i=self.letter_to_number(lokacijaIgraca[0])
+        j=lokacijaIgraca[1]
+        potezi_za_poziciju = self.pronadji_moguce_poteze(tabla, (i, j))
+        moguci_potezi.extend([(lokacijaIgraca, 0, potez[0]+str(potez[1])) for potez in potezi_za_poziciju])
+        for potez in moguci_potezi:
+            print(potez)
 
-        for i in range(tabla.velicina()):
-            for j in range(tabla.velicina()):
-                polje = tabla.vrati_vrednost((i, j))
-
-                if polje == igrac:
-                    potezi_za_poziciju = self.pronadji_moguce_poteze(tabla, (i, j))
-                    moguci_potezi.extend([(igrac, (i, j), potez) for potez in potezi_za_poziciju])
-
-        return moguci_potezi
-
+    def vrati_vrednost(self, i, j):
+        cell_value = self.vrati_stanje(i * 10 + j)
+        if cell_value == "PRAZNO":
+            return ['.'] * 9
+        else:
+            return cell_value
     def pronadji_moguce_poteze(self,tabla, pozicija):
         moguci_potezi = []
 
@@ -561,50 +576,34 @@ class Interfejs:
 
         for sused in self.pronadji_susede(tabla, pozicija):
             sused_x, sused_y = sused
-
-            # Provera da li se figura može pomeriti do suseda
-            if self.figura_se_moze_pomeriti(tabla, pozicija, sused):
-                moguci_potezi.append((sused_x - x, sused_y - y))
+            moguci_potezi.append((self.number_to_letter(sused_x).upper(), sused_y))
 
         return moguci_potezi
 
-    def pronadji_susede(tabla, pozicija):
+    def pronadji_susede(self,tabla, pozicija):
         susedi = []
 
-        x, y = pozicija
-        koraci = [(-1, -1), (-1, 1), (1, -1), (1, 1)]  # Dijagonalna kretanja
+        a, b = pozicija
+        x=int(a)
+        y=int(b)
+        koraci = [(-1, -1, "gl"), (-1, 1, "gd"), (1, -1, "dl"), (1, 1, "dd")]  # Dijagonalna kretanja sa smerom
+        # Dijagonalna kretanja
 
         for korak in koraci:
             sused_x, sused_y = x + korak[0], y + korak[1]
-            if tabla.validna_pozicija((sused_x, sused_y)):
+            pozicija=self.number_to_letter(sused_x).upper()+str(sused_y)
+
+            p=self.vrati_vrednost(sused_x,sused_y)
+            broj_tacaka=p.count('.')
+
+            og = self.number_to_letter(x).upper() + str(y)
+
+            if self.validan_sused(pozicija,str(broj_tacaka-2),korak[2],og):
                 susedi.append((sused_x, sused_y))
 
         return susedi
 
-    def figura_se_moze_pomeriti(tabla, pozicija, cilj):
-        x, y = pozicija
-        cilj_x, cilj_y = cilj
 
-        # Provera da li ciljno polje nije van granica table
-        if not tabla.validna_pozicija(cilj):
-            return False
-
-        # Provera da li ciljno polje ima figuru
-        if tabla.vrati_vrednost(cilj) is not None:
-            return False
-
-        # Provera dijagonalnog pomeranja za jedno polje
-        if abs(cilj_x - x) == 1 and abs(cilj_y - y) == 1:
-            return True
-
-        # Provera pomeranja sa stvaranjem steka
-        if cilj_x - x == 2 and abs(cilj_y - y) == 2:
-            # Provera da li je izmedju pocetne i ciljne pozicije figura protivnika
-            sused_x, sused_y = x + (cilj_x - x) // 2, y + (cilj_y - y) // 2
-            if tabla.validna_pozicija((sused_x, sused_y)) and tabla.vrati_vrednost((sused_x, sused_y)) is not None:
-                return True
-
-        return False
 
 
     def svi_moguci_potezi(self,trenutno_stanje, trenutni_igrac):
@@ -682,3 +681,57 @@ class Interfejs:
                 najbolja_vrednost = vrednost_poteza
                 najbolji_potez = potez
         return najbolji_potez
+
+    def je_prazno_polje(self, pozicija):
+        p=self.vrati_vrednost(self.letter_to_number(pozicija[0]),int(pozicija[1]))
+        count=p.count('.')
+        if count==9:
+            return True
+        else: return False
+    def polje_sused(self, polje):
+        if polje[0] in string.ascii_uppercase and polje[1:].isdigit():
+            if self.je_prazno_polje(polje):
+                if self.ima_vise_nepraznih_suseda(polje):
+                    return False
+            return True
+        return False
+
+    def stek_sused(self, pozicija, og):
+        if pozicija.isdigit() and 0 <= int(pozicija) <= 7:
+            p = self.vrati_vrednost(self.letter_to_number(og[0]), int(og[1]))
+
+            if 9-p.count('.')<=int(pozicija):
+                return True
+            else:
+                return False
+        else:
+            return False
+
+    def smer_sused(self, smer, pozicija_polja):
+        if (smer.upper() in {'GL', 'DL', 'GD', 'DD'}):
+            if (self.pozicija_polja.startswith('A')):
+                if (smer == 'GL' or smer == 'GD'):
+                    return False
+            if (self.pozicija_polja.startswith(self.number_to_letter(self.velicina_table))):
+                if (smer == 'DL' or smer == 'DD'):
+                    return False
+            if (self.pozicija_polja.__contains__('1')):
+                if (smer == 'GL' or smer == 'DL'):
+                    return False
+            if (self.pozicija_polja.__contains__(str(self.velicina_table))):
+                if (smer == 'GD' or smer == 'DD'):
+                    return False
+            return True
+        else:
+            return False
+
+    def validan_sused(self, polje, pozicija_steka, smer,og):
+        if not self.polje_sused(polje):
+            return False
+
+        if not self.stek_sused(pozicija_steka,og):
+            return False
+
+        if not self.smer_sused(smer, og):
+            return False
+        return True
