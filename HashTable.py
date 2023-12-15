@@ -75,12 +75,21 @@ class HashTable:
         matrix = [[''] * matrix_size for _ in range(matrix_size)]
 
     def matricu_u_hash(self, matrix):
-        hash_table = HashTable(1)  # Assuming you have a HashTable class
-        for row_index, row in enumerate(matrix):
-            for col_index, value in enumerate(row):
-                key = row_index * len(matrix) + col_index
-                hash_table.insert(key, value)
+        if matrix is None:
+            print("Error: Matrix is None.")
+            return None
+
+        hash_table = HashTable(1)
+
+        try:
+            for row_index, row in enumerate(matrix):
+                for col_index, value in enumerate(row):
+                    key = row_index * len(matrix) + col_index
+                    hash_table.insert(key, value)
+        except TypeError as e:
+            print(f"Error: {e}")
 
         return hash_table
+
     def __str__(self):
         return "".join(str(item) for item in self.hash_table)
