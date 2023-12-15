@@ -91,6 +91,11 @@ class Interfejs:
 
     def je_validno_polje(self, polje):
         if polje[0] in string.ascii_uppercase and polje[1:].isdigit():
+            return True
+        return False
+
+    def je_validno_polje2(self, polje):
+        if polje[0] in string.ascii_uppercase and polje[1:].isdigit():
             if self.je_prazno_polje(polje):
                 if self.ima_vise_nepraznih_suseda(polje):
                     return False
@@ -102,10 +107,7 @@ class Interfejs:
 
         if p[int(pozicija)] == self.trenutni_igrac or p[int(pozicija)] == '.':
             if pozicija.isdigit() and 0 <= int(pozicija) <= 7:
-                if 9 - p.count('.') <= int(pozicija):
                     return True
-                else:
-                    return False
             else:
                 return False
         else:
@@ -135,7 +137,7 @@ class Interfejs:
             print('Unesli ste neispravno polje.')
             return False
 
-        if not self.je_validna_pozicija_steka(8-int(pozicija_steka), polje):
+        if not self.je_validna_pozicija_steka(pozicija_steka, polje):
             return False
 
         if not self.je_validan_smer(smer,polje):
@@ -662,10 +664,10 @@ class Interfejs:
 
 
     def validan_sused(self, polje, pozicija_steka, smer,og):
-        if not self.je_validno_polje(polje):
+        if not self.je_validno_polje2(polje):
             return False
 
-        if not self.je_validna_pozicija_steka(pozicija_steka,og):
+        if not self.je_validna_pozicija_steka2(pozicija_steka,og):
             return False
 
         if not self.je_validan_smer(smer, og):
@@ -675,6 +677,17 @@ class Interfejs:
 
     #funkcije za prikaz mogucih stanja
 
+    def je_validna_pozicija_steka2(self,pozicija,og):
+            p = self.vrati_vrednost(self.letter_to_number(og[0]), int(og[1]))
+
+            if p[int(pozicija)] == self.trenutni_igrac or p[int(pozicija)] == '.':
+                if pozicija.isdigit() and 0 <= int(pozicija) <= 7:
+                    if 9-p.count('.') <= int(pozicija):
+                       return True
+                else:
+                    return False
+            else:
+                return False
     def vrati_stanje2(self, broj,trenutno_stanje):
         return trenutno_stanje.get_val(broj)
 
