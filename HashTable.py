@@ -83,14 +83,6 @@ class HashTable:
 
         return matrix
 
-    def matricu_u_hash(hash_table,matrix):
-        hash_table = HashTable(1)
 
-        for row_index, row in enumerate(matrix):
-            for col_index, value in enumerate(row):
-                key = row_index * len(matrix) + col_index
-                hash_table.set_val(key, value)
-
-        return hash_table
     def __str__(self):
         return "".join(str(item) for item in self.hash_table)
