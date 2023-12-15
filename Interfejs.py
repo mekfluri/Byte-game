@@ -435,20 +435,60 @@ class Interfejs:
 
     def nacrtaj_trenutno_stanje(self):
         n = self.velicina_table + 1
+
         matrix = [[deque(['.'] * 8) for _ in range(n)] for _ in range(n)]
+
         for j in range(1, n):
             matrix[0][j].append(str(j))
         for i, letter in enumerate(string.ascii_uppercase[:n - 1]):
             matrix[i + 1][0].append(letter)
+
         for i in range(1, n):
             for j in range(1, n):
                 if (i + j) % 2 == 0:
                     que1 = self.vrati_stanje(i * 10 + j)
-                    if que1 == "PRAZNO":
+                    if que1.count('.') == 1:
+                        self.obrisi_stanje(i * 10 + j)
+                        self.dodaj_stanje(i * 10 + j, deque([]))
+                        matrix[i][j] = deque(['.'] * 9)
+                    elif que1 == "PRAZNO" or que1 == deque([]):
                         matrix[i][j] = deque(['.'] * 9)
                     else:
                         matrix[i][j] = que1
-        #self.tabla = matrix
+
+        self.tabla = matrix
+        for i in range(n):
+            for j in range(n):
+                self.print_stack_matrix(matrix[i][j])
+
+            print('\n')
+
+    def odstampaj_moguce_stanje(self, hash_table):
+        for index, bucket in enumerate(hash_table.hash_table):
+            print(f"Polje {index}: {bucket}")
+
+        n = self.velicina_table + 1
+
+        matrix = [[deque(['.'] * 8) for _ in range(n)] for _ in range(n)]
+
+        for j in range(1, n):
+            matrix[0][j].append(str(j))
+        for i, letter in enumerate(string.ascii_uppercase[:n - 1]):
+            matrix[i + 1][0].append(letter)
+
+        for i in range(1, n):
+            for j in range(1, n):
+                if (i + j) % 2 == 0:
+                    que1 = self.vrati_stanje2(i * 10 + j, hash_table)
+                if que1.count('.') == 1:
+                    self.obrisi_stanje2(i * 10 + j, hash_table)
+                    self.dodaj_stanje2(i * 10 + j, deque([]), hash_table)
+                    matrix[i][j] = deque(['.'] * 9)
+                elif que1 == "PRAZNO" or que1 == deque([]):
+                    matrix[i][j] = deque(['.'] * 9)
+                else:
+                    matrix[i][j] = que1
+        self.tabla = matrix
         for i in range(n):
             for j in range(n):
                 self.print_stack_matrix(matrix[i][j])
