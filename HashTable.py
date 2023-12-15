@@ -85,7 +85,6 @@ class HashTable:
                 row = key // matrix_size
                 col = key % matrix_size
                 matrix[row][col] = value
-
         return matrix
 
     def matricu_u_hash(hash_table,matrix):
