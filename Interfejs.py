@@ -539,7 +539,7 @@ class Interfejs:
         return matrica
 
     def spajanje_stekova2(self, polje1, polje2, indeks1, indeks2, trenutno_stanje):
-        matrix_size = len(trenutno_stanje)
+        matrix_size = len(trenutno_stanje)  # Assuming trenutno_stanje is a matrix
         row1, col1 = indeks1 // matrix_size, indeks1 % matrix_size
         row2, col2 = indeks2 // matrix_size, indeks2 % matrix_size
 
