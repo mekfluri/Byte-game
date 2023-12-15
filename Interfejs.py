@@ -554,7 +554,7 @@ class Interfejs:
 
                 duzinaPolja2 = len(polje2)
                 if (duzinaPolja2 < 9):
-                    for i in range(0, 9 - duzinaPolja2):
+                    for i in range(0, 7 - duzinaPolja2):
                         row = row2 + i + len(elementi_od_pocetka_do_mesta)
                         trenutno_stanje[row][col2] = '.'
 
@@ -566,7 +566,7 @@ class Interfejs:
 
                 duzinaPolja1 = len(polje1)
                 if (duzinaPolja1 < 9):
-                    for i in range(0, 9 - duzinaPolja1):
+                    for i in range(0, 7 - duzinaPolja1):
                         row = row1 + i + len(elementi_od_pocetka_do_mesta)
                         trenutno_stanje[row][col1] = '.'
 
@@ -586,7 +586,7 @@ class Interfejs:
         nova_stanja = []
         self.matrica=trenutno_stanje.hashumatricu(self.velicina_table)
         for potez in self.potezi:
-            stanje = trenutno_stanje.matricu_u_hash(self.matrica)
+            stanje = self.matrica
             novo_stanje = self.novo_stanje_na_osnovu_poteza(stanje, potez[0], potez[1], potez[2])
             nova_stanja.append(novo_stanje)
 
@@ -642,6 +642,17 @@ class Interfejs:
         ts2 = self.dodaj_stanje2(pozicija2, stek2, trenutno_stanje)
         return ts1, ts2
 
+    def set_val(self, broj, stek, trenutno_stanje):
+        matrix_size = len(trenutno_stanje)
+        row = broj // matrix_size
+        col = broj % matrix_size
+        trenutno_stanje[row][col] = stek
+
+    def delete_val(self, broj, trenutno_stanje):
+        matrix_size = len(trenutno_stanje)
+        row = broj // matrix_size
+        col = broj % matrix_size
+        trenutno_stanje[row][col] = ''
     def odstampaj_moguce_stanje(self, hash_table):
         for index, bucket in enumerate(hash_table.hash_table):
             print(f"Polje {index}: {bucket}")

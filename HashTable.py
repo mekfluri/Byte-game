@@ -74,15 +74,13 @@ class HashTable:
     def hashumatricu(hash_table, matrix_size):
         matrix = [[''] * matrix_size for _ in range(matrix_size)]
 
-        for key in range(matrix_size * matrix_size):
-            value = hash_table.get_val(key)
-            if value is not None:
-                row = key // matrix_size
-                col = key % matrix_size
-                matrix[row][col] = value
+    def matricu_u_hash(self, matrix):
+        hash_table = HashTable(1)  # Assuming you have a HashTable class
+        for row_index, row in enumerate(matrix):
+            for col_index, value in enumerate(row):
+                key = row_index * len(matrix) + col_index
+                hash_table.insert(key, value)
 
-        return matrix
-
-
+        return hash_table
     def __str__(self):
         return "".join(str(item) for item in self.hash_table)
