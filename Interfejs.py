@@ -1,3 +1,4 @@
+import copy
 import string
 from collections import deque
 from Graph import Chessboard
@@ -22,7 +23,7 @@ class Interfejs:
         self.user1 = None
         self.user2 = None
         self.potezi = deque()
-        self.matrica=None
+        self.matrica= []
 
     def dodaj_stanje(self, broj, stek):
         self.trenutno_stanje.set_val(broj, stek)
@@ -177,13 +178,25 @@ class Interfejs:
         self.pozicija_polja = input("Unesite poziciju polja:").upper()
         print("Ovo su svi moguci potezi, koje mozete odigrati")
         self.potezi = self.moguci_potezi_igraca(self.vrati_tablu(), self.pozicija_polja)
-        moguca_stanja = self.sva_moguca_stanja(self.trenutno_stanje, self.trenutni_igrac)
+
+        moguca_stanja = self.sva_moguca_stanja()
         for stanje in moguca_stanja:
             self.odstampaj_moguce_stanje(stanje)
         self.mesto_na_steku = input("Unesite mesto figure na steku:")
         self.smer_pomeranja = input("Unesite smer pomeranja figure:").upper()
         return self.je_validan_potez(self.pozicija_polja, self.mesto_na_steku, self.smer_pomeranja)
 
+    def hashumatricu(self, tabela, matrix_size):
+        matrix = [[''] * (matrix_size + 1) for _ in range(matrix_size + 1)]
+
+        for i in range(0, matrix_size + 1):
+            for j in range(0, matrix_size + 1):
+                value = tabela.get_val(i * 10 + j)
+                # Primena deepcopy na vrednost pre nego što je postavite u matricu
+                matrix[i][j] = copy.deepcopy(value)
+                print(f'Tabela[{i * 10 + j}] = {value}')
+
+        return matrix
     def print_stack_matrix(self, stack):
         matrix1 = [[0] * 3 for _ in range(3)]
         stack_list = list(stack)
@@ -409,7 +422,7 @@ class Interfejs:
                         matrix[i][j] = deque(['.'] * 9)
                     else:
                         matrix[i][j] = que1
-        self.tabla = matrix
+        #self.tabla = matrix
         for i in range(n):
             for j in range(n):
                 self.print_stack_matrix(matrix[i][j])
@@ -454,8 +467,8 @@ class Interfejs:
                         broj_slova = self.letter_to_number(slovo)
                         indeks1 = broj_slova * 10 + broj
                         indeks2 = polje[2]
-                        vrednsot_steka1 = self.vrati_stanje(indeks1)
-                        vrednost_steka2 = self.vrati_stanje(indeks2)
+                        vrednsot_steka1 = self.vrati_stanje2(indeks1)
+                        vrednost_steka2 = self.vrati_stanje2(indeks2)
                         self.spajanje_stekova(vrednsot_steka1, vrednost_steka2, indeks1, indeks2)
                         self.trenutni_igrac = 'X' if self.trenutni_igrac == 'O' else 'O'
                         self.prikazi_stanje_igre()
@@ -511,17 +524,19 @@ class Interfejs:
                 susedi.append((sused_x, sused_y))
         return susedi
 
-    def postavi_moguce_stanje(self, trenutno_stanje, mesto_na_steku, pozicija_postavljanja):
+    def postavi_moguce_stanje(self, mesto_na_steku, pozicija_postavljanja):
         slovo, broj = self.pozicija_polja[0].upper(), int(self.pozicija_polja[1:])
         broj_slova = self.letter_to_number(slovo)
         indeks1 = broj_slova * 10 + broj
         slovo, broj = pozicija_postavljanja[0].upper(), int(pozicija_postavljanja[1:])
         broj_slova = self.letter_to_number(slovo)
         indeks2 = broj_slova * 10 + broj
-        vrednsot_steka1 = self.vrati_stanje(indeks1)
-        vrednost_steka2 = self.vrati_stanje(indeks2)
-        trenutno_stanje = self.spajanje_stekova2(vrednsot_steka1, vrednost_steka2, indeks1, indeks2, trenutno_stanje)
-        return trenutno_stanje
+        vrednost_steka1 = copy.deepcopy(self.vrati_stanje(indeks1))
+        vrednost_steka2 = copy.deepcopy(self.vrati_stanje(indeks2))
+        matrica = self.spajanje_stekova3( vrednost_steka1, vrednost_steka2, indeks1, indeks2)
+        print("postavi moguce stanje")
+        self.nacrtaj_trenutno_stanje()
+        return matrica
 
     def spajanje_stekova2(self, polje1, polje2, indeks1, indeks2, trenutno_stanje):
         matrix_size = len(trenutno_stanje)  # Assuming trenutno_stanje is a matrix
@@ -553,10 +568,11 @@ class Interfejs:
                     trenutno_stanje[row][col2] = element
 
                 duzinaPolja2 = len(polje2)
-                if (duzinaPolja2 < 9):
-                    for i in range(0, 7 - duzinaPolja2):
-                        row = row2 + i + len(elementi_od_pocetka_do_mesta)
-                        trenutno_stanje[row][col2] = '.'
+                if duzinaPolja2 < 8:
+                    for i in range(0, 8 - duzinaPolja2):
+                        new_row = row2 + i + len(elementi_od_pocetka_do_mesta)
+                        if new_row < 8:  # Make sure not to exceed the valid row index
+                            trenutno_stanje[new_row][col2] = '.'
 
                 print(trenutno_stanje)
 
@@ -565,10 +581,11 @@ class Interfejs:
                     trenutno_stanje[row][col1] = '.'
 
                 duzinaPolja1 = len(polje1)
-                if (duzinaPolja1 < 9):
-                    for i in range(0, 7 - duzinaPolja1):
-                        row = row1 + i + len(elementi_od_pocetka_do_mesta)
-                        trenutno_stanje[row][col1] = '.'
+                if duzinaPolja1 < 8:  # Assuming the matrix has 8 rows
+                    for i in range(0, 8 - duzinaPolja1):
+                        new_row = row1 + i + len(elementi_od_pocetka_do_mesta)
+                        if new_row < 8:
+                            trenutno_stanje[new_row][col1] = '.'
 
                 print(trenutno_stanje)
 
@@ -576,21 +593,70 @@ class Interfejs:
             else:
                 print("Potez ne moze da se odigra, nije validan")
 
-    def novo_stanje_na_osnovu_poteza(self, trenutno_stanje, pozicija, mesto_na_steku, pozicija_postavljanja):
+    def spajanje_stekova3(self, polje1, polje2, indeks1, indeks2):
+        while '.' in polje1:
+            polje1.remove('.')
+        while '.' in polje2:
+            polje2.remove('.')
+        visina_drugog_steka = len(polje2)
 
+        indeks = int(self.mesto_na_steku)
+        # pajton koristi indeksiranje od 0
+        elementi_od_pocetka_do_mesta = (list(polje1)[indeks:])
+        visina_steka_za_premestanje = len(elementi_od_pocetka_do_mesta)
+        if (visina_drugog_steka + visina_steka_za_premestanje > 8):
+            print("Rezultujuci stek ima vise od 8 elemenata potez nije validan")
+        else:
+            if (visina_drugog_steka > int(self.mesto_na_steku)):
+                for element in reversed(elementi_od_pocetka_do_mesta):
+                    polje2.appendleft(element)
+                duzinaPolja2 = len(polje2)
+                if (duzinaPolja2 < 9):
+                    for i in range(0, 9 - duzinaPolja2):
+                        polje2.appendleft('.')
+                print(polje2)
+                polje1.rotate(-int(self.mesto_na_steku))
+                for _ in range(0, len(elementi_od_pocetka_do_mesta)):
+                    polje1.popleft()
+                duzinaPolja1 = len(polje1)
+                if (duzinaPolja1 < 9):
+                    for i in range(0, 9 - duzinaPolja1):
+                        polje1.appendleft('.')
+                print(polje1)
+                trenutno_stanje1 = self.menjaj_stanje_igre2(indeks1, polje1, indeks2, polje2)
+                print("spajanje stekova")
+                self.nacrtaj_trenutno_stanje()
+                return trenutno_stanje1
+            else:
+                 print("Potez ne moze da se odigra, nije validan")
+                 return None
+    def novo_stanje_na_osnovu_poteza(self, pozicija, mesto_na_steku, pozicija_postavljanja):
 
-        novo_stanje = self.postavi_moguce_stanje(trenutno_stanje, mesto_na_steku, pozicija_postavljanja)
+        novo_stanje = self.postavi_moguce_stanje( mesto_na_steku, pozicija_postavljanja)
+        print("novo stanje")
+        self.nacrtaj_trenutno_stanje()
         return novo_stanje
 
-    def sva_moguca_stanja(self, trenutno_stanje, trenutni_igrac):
+    def sva_moguca_stanja(self):
         nova_stanja = []
-        self.matrica=trenutno_stanje.hashumatricu(self.velicina_table)
+        stanje = copy.deepcopy(self.trenutno_stanje)
         for potez in self.potezi:
-            stanje = self.matrica
-            novo_stanje = self.novo_stanje_na_osnovu_poteza(stanje, potez[0], potez[1], potez[2])
+            self.matrica = self.hashumatricu(stanje,self.velicina_table)
+            self.nacrtaj_trenutno_stanje()
+            print("stampam matricu")
+            for red in self.matrica:
+                for element in red:
+                  print(element, end=" ")  # Koristimo end=" " da bismo razdvojili elemente u istom redu
+                print()  # Prelazi
+            novo_stanje = self.novo_stanje_na_osnovu_poteza(potez[0], potez[1], potez[2])
+            for red in novo_stanje:
+                for element in red:
+                    print(element, end=" ")  # Koristimo end=" " da bismo razdvojili elemente u istom redu
+                print()  # Prelazi
             nova_stanja.append(novo_stanje)
+            print("sva moguca stanja")
+            self.nacrtaj_trenutno_stanje()
 
-        trenutno_stanje=trenutno_stanje.matricu_u_hash(self.matrica)
         return nova_stanja
 
     def je_prazno_polje(self, pozicija):
@@ -623,10 +689,12 @@ class Interfejs:
             return False
 
     def vrati_stanje2(self, broj, trenutno_stanje):
-        return trenutno_stanje.get_val(broj)
+        return trenutno_stanje[broj//10][broj%10]
 
     def obrisi_stanje2(self, broj, trenutno_stanje):
-        trenutno_stanje.delete_val(broj)
+        #nije hash nego je matrica
+        return trenutno_stanje[broj[0]][broj[1]]
+        #trenutno_stanje.delete_val(broj)
 
     def vrati_tablu2(self, trenutno_stanje):
         return trenutno_stanje
@@ -635,12 +703,10 @@ class Interfejs:
         trenutno_stanje.set_val(broj, stek)
         return trenutno_stanje
 
-    def menjaj_stanje_igre2(self, pozicija1, stek1, pozicija2, stek2, trenutno_stanje):
-        self.obrisi_stanje2(pozicija1, trenutno_stanje)
-        self.obrisi_stanje2(pozicija2, trenutno_stanje)
-        ts1 = self.dodaj_stanje2(pozicija1, stek1, trenutno_stanje)
-        ts2 = self.dodaj_stanje2(pozicija2, stek2, trenutno_stanje)
-        return ts1, ts2
+    def update_stanje(self, broj, vrednost):
+        print("update")
+        self.nacrtaj_trenutno_stanje()
+        return self.matrica[broj//10][broj%10] == vrednost
 
     def set_val(self, broj, stek, trenutno_stanje):
         matrix_size = len(trenutno_stanje)
@@ -649,10 +715,23 @@ class Interfejs:
         trenutno_stanje[row][col] = stek
 
     def delete_val(self, broj, trenutno_stanje):
-        matrix_size = len(trenutno_stanje)
+        matrix_size = len(trenutno_stanje)  # Assuming trenutno_stanje is a matrix
         row = broj // matrix_size
         col = broj % matrix_size
         trenutno_stanje[row][col] = ''
-    def odstampaj_moguce_stanje(self, hash_table):
-        for index, bucket in enumerate(hash_table.hash_table):
-            print(f"Polje {index}: {bucket}")
+    def menjaj_stanje_igre2(self, pozicija1, stek1, pozicija2, stek2):
+
+        self.update_stanje(pozicija1, stek1)
+        self.update_stanje(pozicija2, stek2)
+        print("menjaj stanje")
+        self.nacrtaj_trenutno_stanje()
+        return self.matrica
+
+
+
+
+
+
+    def odstampaj_moguce_stanje(self, matrica):
+        print("EVO")
+        print(matrica)
