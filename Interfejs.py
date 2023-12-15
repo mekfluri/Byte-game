@@ -178,10 +178,17 @@ class Interfejs:
         self.pozicija_polja = input("Unesite poziciju polja:").upper()
         print("Ovo su svi moguci potezi, koje mozete odigrati")
         self.potezi = self.moguci_potezi_igraca(self.vrati_tablu(), self.pozicija_polja)
-
+        svi = self.pronadji()
+        for potez in self.potezi:
+            pozicija = self.number_to_letter(potez[1])+ str(potez[0])
+            moguca_stanja = self.sva_moguca_stanja(pozicija,  potez[2])
+            for stanje in moguca_stanja:
+                self.odstampaj_moguce_stanje(stanje)
+        '''
         moguca_stanja = self.sva_moguca_stanja()
         for stanje in moguca_stanja:
             self.odstampaj_moguce_stanje(stanje)
+        '''
         self.mesto_na_steku = input("Unesite mesto figure na steku:")
         self.smer_pomeranja = input("Unesite smer pomeranja figure:").upper()
         return self.je_validan_potez(self.pozicija_polja, self.mesto_na_steku, self.smer_pomeranja)
@@ -221,6 +228,25 @@ class Interfejs:
         else:
             for _ in range(9):
                 print(' ', end=' ')
+
+    def pronadji(self):
+
+        svi = []
+        for i in range(0, self.velicina_table+1):
+            for j in range(0, self.velicina_table+1):
+                if (i+j) % 2 == 0:
+                    vrednost = self.vrati_stanje(i*10+j)
+                    br=0
+                    for l in vrednost:
+                        if l == self.trenutni_igrac:
+                            mesto = {
+                                'red' : i,
+                                'kolona':j,
+                                'pozicija_u_steku':8-br
+                            }
+                            svi.append(mesto)
+                        br=br+1
+        return svi
 
     def najblizi_element(self):
         i = self.letter_to_number(self.pozicija_polja[0])
@@ -524,16 +550,16 @@ class Interfejs:
                 susedi.append((sused_x, sused_y))
         return susedi
 
-    def postavi_moguce_stanje(self, mesto_na_steku, pozicija_postavljanja):
+    def postavi_moguce_stanje(self, pozicija, mesto_na_steku, pozicija_postavljanja):
         slovo, broj = self.pozicija_polja[0].upper(), int(self.pozicija_polja[1:])
         broj_slova = self.letter_to_number(slovo)
-        indeks1 = broj_slova * 10 + broj
+        indeks1 = pozicija
         slovo, broj = pozicija_postavljanja[0].upper(), int(pozicija_postavljanja[1:])
         broj_slova = self.letter_to_number(slovo)
         indeks2 = broj_slova * 10 + broj
         vrednost_steka1 = copy.deepcopy(self.vrati_stanje(indeks1))
         vrednost_steka2 = copy.deepcopy(self.vrati_stanje(indeks2))
-        matrica = self.spajanje_stekova3( vrednost_steka1, vrednost_steka2, indeks1, indeks2)
+        matrica = self.spajanje_stekova3( vrednost_steka1, vrednost_steka2, indeks1, indeks2, mesto_na_steku)
         print("postavi moguce stanje")
         self.nacrtaj_trenutno_stanje()
         return matrica
@@ -593,14 +619,14 @@ class Interfejs:
             else:
                 print("Potez ne moze da se odigra, nije validan")
 
-    def spajanje_stekova3(self, polje1, polje2, indeks1, indeks2):
+    def spajanje_stekova3(self, polje1, polje2, indeks1, indeks2, mesto_na_steku):
         while '.' in polje1:
             polje1.remove('.')
         while '.' in polje2:
             polje2.remove('.')
         visina_drugog_steka = len(polje2)
 
-        indeks = int(self.mesto_na_steku)
+        indeks = mesto_na_steku
         # pajton koristi indeksiranje od 0
         elementi_od_pocetka_do_mesta = (list(polje1)[indeks:])
         visina_steka_za_premestanje = len(elementi_od_pocetka_do_mesta)
@@ -632,12 +658,12 @@ class Interfejs:
                  return None
     def novo_stanje_na_osnovu_poteza(self, pozicija, mesto_na_steku, pozicija_postavljanja):
 
-        novo_stanje = self.postavi_moguce_stanje( mesto_na_steku, pozicija_postavljanja)
+        novo_stanje = self.postavi_moguce_stanje( pozicija, mesto_na_steku, pozicija_postavljanja)
         print("novo stanje")
         self.nacrtaj_trenutno_stanje()
         return novo_stanje
 
-    def sva_moguca_stanja(self):
+    def sva_moguca_stanja(self, pozicija, pozicija_u_steku):
         nova_stanja = []
         stanje = copy.deepcopy(self.trenutno_stanje)
         for potez in self.potezi:
@@ -648,7 +674,7 @@ class Interfejs:
                 for element in red:
                   print(element, end=" ")  # Koristimo end=" " da bismo razdvojili elemente u istom redu
                 print()  # Prelazi
-            novo_stanje = self.novo_stanje_na_osnovu_poteza(potez[0], potez[1], potez[2])
+            novo_stanje = self.novo_stanje_na_osnovu_poteza(pozicija, pozicija_u_steku, potez[2])
             for red in novo_stanje:
                 for element in red:
                     print(element, end=" ")  # Koristimo end=" " da bismo razdvojili elemente u istom redu
