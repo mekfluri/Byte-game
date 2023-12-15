@@ -524,35 +524,54 @@ class Interfejs:
         return trenutno_stanje
 
     def spajanje_stekova2(self, polje1, polje2, indeks1, indeks2, trenutno_stanje):
+        matrix_size = len(trenutno_stanje)  # Assuming trenutno_stanje is a matrix
+        row1, col1 = indeks1 // matrix_size, indeks1 % matrix_size
+        row2, col2 = indeks2 // matrix_size, indeks2 % matrix_size
+
         while '.' in polje1:
             polje1.remove('.')
         while '.' in polje2:
             polje2.remove('.')
+
         visina_drugog_steka = len(polje2)
         indeks = int(self.mesto_na_steku)
-        # pajton koristi indeksiranje od 0
-        elementi_od_pocetka_do_mesta = (list(polje1)[indeks:])
+
+        # Ensure indeks is an integer
+        indeks = int(indeks)
+
+        # Pajton koristi indeksiranje od 0
+        elementi_od_pocetka_do_mesta = list(polje1)[indeks:]
+
         visina_steka_za_premestanje = len(elementi_od_pocetka_do_mesta)
+
         if (visina_drugog_steka + visina_steka_za_premestanje > 8):
             print("Rezultujuci stek ima vise od 8 elemenata potez nije validan")
         else:
             if (visina_drugog_steka > int(self.mesto_na_steku)):
-                for element in reversed(elementi_od_pocetka_do_mesta):
-                    polje2.appendleft(element)
+                for i, element in enumerate(reversed(elementi_od_pocetka_do_mesta)):
+                    row = row2 + i
+                    trenutno_stanje[row][col2] = element
+
                 duzinaPolja2 = len(polje2)
                 if (duzinaPolja2 < 9):
                     for i in range(0, 9 - duzinaPolja2):
-                        polje2.appendleft('.')
-                print(polje2)
-                polje1.rotate(-int(self.mesto_na_steku))
-                for _ in range(0, len(elementi_od_pocetka_do_mesta)):
-                    polje1.popleft()
+                        row = row2 + i + len(elementi_od_pocetka_do_mesta)
+                        trenutno_stanje[row][col2] = '.'
+
+                print(trenutno_stanje)
+
+                for i in range(len(elementi_od_pocetka_do_mesta)):
+                    row = row1 + i
+                    trenutno_stanje[row][col1] = '.'
+
                 duzinaPolja1 = len(polje1)
                 if (duzinaPolja1 < 9):
                     for i in range(0, 9 - duzinaPolja1):
-                        polje1.appendleft('.')
-                print(polje1)
-                self.menjaj_stanje_igre2(indeks1, polje1, indeks2, polje2, trenutno_stanje)
+                        row = row1 + i + len(elementi_od_pocetka_do_mesta)
+                        trenutno_stanje[row][col1] = '.'
+
+                print(trenutno_stanje)
+
                 return trenutno_stanje
             else:
                 print("Potez ne moze da se odigra, nije validan")
