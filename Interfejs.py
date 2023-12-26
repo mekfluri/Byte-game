@@ -15,7 +15,7 @@ class Interfejs:
         self.velicina_table = 0
         self.trenutni_igrac = ''
         self.tabla = None
-        self.igraci = {'X': 'Čovek 1', 'O': 'Čovek 2'}
+        self.igraci = {'X': 'Čovek', 'O': 'Računar'}
         # da se pametne trenutna stanja
         self.trenutno_stanje = HashTable(1)
         self.pozicija_polja = ''
@@ -195,12 +195,12 @@ class Interfejs:
                 return i
     def unos_poteza(self):
         self.pozicija_polja = input("Unesite poziciju polja:").upper()
-        print("Ovo su svi moguci potezi, koje mozete odigrati")
+       # print("Ovo su svi moguci potezi, koje mozete odigrati")
 
-        pozicije_igraca = self.vrati_pozicije_igraca()
+      #  pozicije_igraca = self.vrati_pozicije_igraca()
 
-        for pozicija in pozicije_igraca:
-          self.potezi.append(self.moguci_potezi_igraca(self.vrati_tablu(), pozicija[0],pozicija[1]))
+       # for pozicija in pozicije_igraca:
+       #   self.potezi.append(self.moguci_potezi_igraca(self.vrati_tablu(), pozicija[0],pozicija[1]))
        # svi = self.pronadji() ovo je ona funkcija visak, sad se sve proverava u sva_moguca_stanja
 
         moguca_stanja = self.sva_moguca_stanja()
@@ -399,6 +399,7 @@ class Interfejs:
                 self.menjaj_stanje_igre(indeks1, polje1, indeks2, polje2)
             else:
                 print("Potez ne moze da se odigra, nije validan")
+                return
 
     def menjaj_stanje_igre(self, pozicija1, stek1, pozicija2, stek2):
         self.obrisi_stanje(pozicija1)
@@ -480,35 +481,132 @@ class Interfejs:
 
     def odigraj_potez(self):
         if self.trenutni_igrac == 'X':
-                if (self.unos_poteza() != False):  # Provera da li je unos validan
-                    susedna_polja = self.proveri_susedna_polja(self.pozicija_polja)
-                    if len(susedna_polja[0]) == 4:
-                        print("Sva polja susedna su prazna")
-                    else:
-                        zauzeta_polja = susedna_polja[1]
-                        for polje in zauzeta_polja:
-                            if polje[1] == self.smer_pomeranja:
-                                print("Potez je validan")
-                                slovo, broj = self.pozicija_polja[0].upper(), int(self.pozicija_polja[1:])
-                                broj_slova = self.letter_to_number(slovo)
-                                indeks1 = broj_slova * 10 + broj
-                                indeks2 = polje[2]
-                                vrednsot_steka1 = self.vrati_stanje(indeks1)
-                                vrednost_steka2 = self.vrati_stanje(indeks2)
-                                self.spajanje_stekova(vrednsot_steka1, vrednost_steka2, indeks1, indeks2)
-                                self.trenutni_igrac = 'X' if self.trenutni_igrac == 'O' else 'O'
-                                self.prikazi_stanje_igre()
-                                return
+            if self.unos_poteza() != False:  # Provera da li je unos validan
+                susedna_polja = self.proveri_susedna_polja(self.pozicija_polja)
+                if len(susedna_polja[0]) == 4:
+                    print("Sva polja susedna su prazna")
                 else:
-                    print("Molimo unesite ispravan potez")
-                    self.odigraj_potez()
-       # else:
-         # self.potez_racunara()
+                    zauzeta_polja = susedna_polja[1]
+                    for polje in zauzeta_polja:
+                        if polje[1] == self.smer_pomeranja:
+                            print("Potez je validan")
+                            slovo, broj = self.pozicija_polja[0].upper(), int(self.pozicija_polja[1:])
+                            broj_slova = self.letter_to_number(slovo)
+                            indeks1 = broj_slova * 10 + broj
+                            indeks2 = polje[2]
+                            vrednsot_steka1 = self.vrati_stanje(indeks1)
+                            vrednost_steka2 = self.vrati_stanje(indeks2)
+                            self.spajanje_stekova(vrednsot_steka1, vrednost_steka2, indeks1, indeks2)
+                            self.trenutni_igrac = 'X' if self.trenutni_igrac == 'O' else 'O'
+                            self.prikazi_stanje_igre()
+                            return
+            else:
+                print("Molimo unesite ispravan potez")
+                self.odigraj_potez()
+        else:
+            stanje = copy.deepcopy(self.trenutno_stanje)
+            self.matrica = self.hashumatricu(stanje, self.velicina_table)
+            potez_racunara = self.odaberi_najbolji_potez('O', stanje)
+            polje_odakle=potez_racunara[2]
+            polje_gde=potez_racunara[0]
 
+            slovo, broj = polje_odakle[0].upper(), int(polje_odakle[1:])
+            broj_slova = self.letter_to_number(slovo)
+            indeks1 = broj_slova * 10 + broj
 
+            slovo, broj = polje_gde[0].upper(), int(polje_gde[1:])
+            broj_slova = self.letter_to_number(slovo)
+            indeks2 = broj_slova * 10 + broj
+            vrednsot_steka1 = self.vrati_stanje(indeks1)
+            vrednost_steka2 = self.vrati_stanje(indeks2)
+            self.spajanje_stekova(vrednost_steka2 , vrednsot_steka1, indeks2, indeks1)
+            self.trenutni_igrac = 'X' if self.trenutni_igrac == 'O' else 'O'
+            self.prikazi_stanje_igre()
+            return
 
-   # def potez_racunara(self):
-        #ovde def fun
+    def evaluate_board(self, board, player):
+        # Broj stekova u vlasništvu igrača
+        broj_stekova_igraca = 0
+        for row in board:
+            for cell in row:
+                if cell == player:
+                    broj_stekova_igraca += 1
+
+        # Ukupna vrednost stekova igrača
+        vrednost_stekova_igraca = 0
+        for row in board:
+            for cell in row:
+                if cell == player:
+                    vrednost_stekova_igraca += len(row) - row.index(cell)  # Vrednost figure na steku
+
+        return broj_stekova_igraca * 10 + vrednost_stekova_igraca  # Ponderisana vrednost
+
+    def odaberi_najbolji_potez(self, igrac, tabla):
+        najbolji_potez = None
+        vrednost_najboljeg_poteza = float('-inf') if igrac == 'O' else float('inf')
+
+        # Generisi dubinu pretraživanja na osnovu veličine table
+        dubina = self.generisi_dubinu_pretrazivanja()
+
+        pozicije_igraca = self.vrati_pozicije_igraca()
+
+        for pozicija in pozicije_igraca:
+            moguci_potezi = self.moguci_potezi_igraca(self.vrati_tablu(), pozicija[0], pozicija[1])
+            for potez in moguci_potezi:
+                # Ispravljen poziv funkcije:
+                self.pozicija_polja=potez[2]
+                novo_stanje = self.novo_stanje_na_osnovu_poteza( potez[0])
+                vrednost_poteza = self.minimax_alphabeta(novo_stanje, dubina - 1, not igrac == 'O', float('-inf'),float('inf'))
+
+                if igrac == 'O' and vrednost_poteza > vrednost_najboljeg_poteza:
+                    vrednost_najboljeg_poteza = vrednost_poteza
+                    najbolji_potez = potez
+                elif igrac == 'X' and vrednost_poteza < vrednost_najboljeg_poteza:
+                    vrednost_najboljeg_poteza = vrednost_poteza
+                    najbolji_potez = potez
+
+        return najbolji_potez
+
+    def minimax_alphabeta(self, node, depth, maximizing_player, alpha, beta):
+        if depth == 0:
+            return self.evaluate_board(node, 'O')
+
+        pozicije_igraca = self.vrati_pozicije_igraca()
+
+        for pozicija in pozicije_igraca:
+            moguci_potezi = self.moguci_potezi_igraca(node, pozicija[0], pozicija[1])
+
+            if maximizing_player:
+                max_eval = float('-inf')
+                for child_state in moguci_potezi:
+                    self.pozicija_polja = child_state[2]
+                    novo_stanje = self.novo_stanje_na_osnovu_poteza(child_state[0])
+                    eval = self.minimax_alphabeta(novo_stanje, depth - 1, False, alpha, beta)
+                    max_eval = max(max_eval, eval)
+                    alpha = max(alpha, eval)
+                    if beta <= alpha:
+                        break
+                return max_eval
+            else:
+                min_eval = float('inf')
+                for child_state in moguci_potezi:
+                    self.pozicija_polja = child_state[2]
+                    novo_stanje = self.novo_stanje_na_osnovu_poteza(child_state[0])
+                    eval = self.minimax_alphabeta(novo_stanje, depth - 1, True, alpha, beta)
+                    min_eval = min(min_eval, eval)
+                    beta = min(beta, eval)
+                    if beta <= alpha:
+                        break
+                return min_eval
+
+    def generisi_dubinu_pretrazivanja(self):
+        if self.velicina_table <= 8:
+            return 4
+        elif self.velicina_table <= 10:
+            return 3
+        else:
+            return 2
+
     def prikazi_stanje_igre(self):
         print("Trenutno stanje igre:")
         self.nacrtaj_trenutno_stanje()
@@ -520,8 +618,8 @@ class Interfejs:
         j = int(lokacijaIgraca[1])
         potezi_za_poziciju = self.pronadji_moguce_poteze(tabla, (i, j),stek)
         moguci_potezi.extend([(lokacijaIgraca, 0, potez[0] + str(potez[1])) for potez in potezi_za_poziciju])
-        for potez in moguci_potezi:
-            print(potez)
+      #  for potez in moguci_potezi:
+        #    print(potez)
         return moguci_potezi
 
     def vrati_vrednost(self, i, j):
@@ -586,7 +684,7 @@ class Interfejs:
 
         return count_nepraznih
 
-    def postavi_moguce_stanje(self, mesto_na_steku, pozicija_postavljanja):
+    def postavi_moguce_stanje(self,  pozicija_postavljanja):
         slovo, broj = self.pozicija_polja[0].upper(), int(self.pozicija_polja[1:])
         broj_slova = self.letter_to_number(slovo)
         indeks1 = broj_slova * 10 + broj
@@ -691,9 +789,9 @@ class Interfejs:
             else:
                  print("Potez ne moze da se odigra, nije validan")
                  return None
-    def novo_stanje_na_osnovu_poteza(self, pozicija, mesto_na_steku, pozicija_postavljanja):
+    def novo_stanje_na_osnovu_poteza(self, pozicija_postavljanja):
 
-        novo_stanje = self.postavi_moguce_stanje( mesto_na_steku, pozicija_postavljanja)
+        novo_stanje = self.postavi_moguce_stanje(  pozicija_postavljanja)
 
         return novo_stanje
 
@@ -703,8 +801,8 @@ class Interfejs:
         for potezi_za_poziciju in self.potezi:
             for potez in potezi_za_poziciju:
                 self.matrica = self.hashumatricu(stanje,self.velicina_table)
-                novo_stanje = self.novo_stanje_na_osnovu_poteza(potez[0], potez[1], potez[2])
-                print('------------------------------------------------------------------------------------------OPCIJA-------------------------------------------------------------------------')
+                novo_stanje = self.novo_stanje_na_osnovu_poteza( potez[2])
+                #print('------------------------------------------------------------------------------------------OPCIJA-------------------------------------------------------------------------')
                 #self.odstampaj_moguce_stanje(novo_stanje)
                 nova_stanja.append(novo_stanje)
 
