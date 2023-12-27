@@ -26,6 +26,7 @@ class Interfejs:
         self.potezi = deque()
         self.matrica= []
 
+
     def dodaj_stanje(self, broj, stek):
         self.trenutno_stanje.set_val(broj, stek)
 
@@ -98,7 +99,7 @@ class Interfejs:
 
     def je_validna_pozicija_steka(self, pozicija, og):
         p = self.vrati_vrednost(self.letter_to_number(og[0]), int(og[1]))
-        if p[int(pozicija)] == self.trenutni_igrac or p[int(pozicija)] == '.':
+        if p[8 - int(pozicija)] == self.trenutni_igrac or p[ 8 - int(pozicija)] == '.':
             if pozicija.isdigit() and 0 <= int(pozicija) <= 7:
                 return True
             else:
@@ -367,6 +368,9 @@ class Interfejs:
             print(" -> ".join(path))
 
     def spajanje_stekova(self, polje1, polje2, indeks1, indeks2):
+
+        kopijaPolja1 =copy.deepcopy(polje1)
+        kopijaPolja2 = copy.deepcopy(polje2)
         while '.' in polje1:
             polje1.remove('.')
         while '.' in polje2:
@@ -397,9 +401,13 @@ class Interfejs:
                         polje1.appendleft('.')
 
                 self.menjaj_stanje_igre(indeks1, polje1, indeks2, polje2)
+                return True
             else:
-                print("Potez ne moze da se odigra, nije validan")
-                return
+                polje1 = copy.deepcopy(kopijaPolja1)
+                polje2 = copy.deepcopy(kopijaPolja2)
+                self.menjaj_stanje_igre(indeks1, polje1, indeks2, polje2)
+                print("Potez ne moze da se odigra, nije validan, pozicija na steku za premestanje je veca od trenutne")
+                return False
 
     def menjaj_stanje_igre(self, pozicija1, stek1, pozicija2, stek2):
         self.obrisi_stanje(pozicija1)
@@ -432,6 +440,7 @@ class Interfejs:
             for j in range(n):
                 self.print_stack_matrix(matrix[i][j])
             print('\n')
+        self.tabla = matrix
 
     def nacrtaj_trenutno_stanje(self):
         n = self.velicina_table + 1
@@ -444,11 +453,11 @@ class Interfejs:
             for j in range(1, n):
                 if (i + j) % 2 == 0:
                     que1 = self.vrati_stanje(i * 10 + j)
-                    if que1 == "PRAZNO":
+                    if que1 == "PRAZNO" or que1.count('.') == 1:
                         matrix[i][j] = deque(['.'] * 9)
                     else:
                         matrix[i][j] = que1
-        #self.tabla = matrix
+        self.tabla = matrix
         for i in range(n):
             for j in range(n):
                 self.print_stack_matrix(matrix[i][j])
@@ -489,16 +498,20 @@ class Interfejs:
                     zauzeta_polja = susedna_polja[1]
                     for polje in zauzeta_polja:
                         if polje[1] == self.smer_pomeranja:
-                            print("Potez je validan")
                             slovo, broj = self.pozicija_polja[0].upper(), int(self.pozicija_polja[1:])
                             broj_slova = self.letter_to_number(slovo)
                             indeks1 = broj_slova * 10 + broj
                             indeks2 = polje[2]
                             vrednsot_steka1 = self.vrati_stanje(indeks1)
                             vrednost_steka2 = self.vrati_stanje(indeks2)
-                            self.spajanje_stekova(vrednsot_steka1, vrednost_steka2, indeks1, indeks2)
+                            rezultat = self.spajanje_stekova(vrednsot_steka1, vrednost_steka2, indeks1, indeks2)
+                            if rezultat is False:
+                                print("Odigrajte novi potez")
+                                self.odigraj_potez()
+                                return
                             self.trenutni_igrac = 'X' if self.trenutni_igrac == 'O' else 'O'
-                            self.prikazi_stanje_igre()
+
+                            #self.prikazi_stanje_igre()
                             return
             else:
                 print("Molimo unesite ispravan potez")
@@ -521,7 +534,7 @@ class Interfejs:
             vrednost_steka2 = self.vrati_stanje(indeks2)
             self.spajanje_stekova(vrednost_steka2 , vrednsot_steka1, indeks2, indeks1)
             self.trenutni_igrac = 'X' if self.trenutni_igrac == 'O' else 'O'
-            self.prikazi_stanje_igre()
+            #self.prikazi_stanje_igre()
             return
 
     def evaluate_board(self, board, player):

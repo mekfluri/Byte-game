@@ -30,7 +30,8 @@ class User:
     def broj_slozenih_stekova(self,polje):
         for red in polje:
           for stek in red:
-            if all(c != '.' for c in stek) and stek[0] == self.oznaka and len(stek)==8:
+            if stek[0] == '.' and stek[1] == self.oznaka and len(stek)==9:
                 self.broj_slozenih += 1
+
 
         return self.broj_slozenih
