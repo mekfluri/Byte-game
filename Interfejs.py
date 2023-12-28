@@ -99,14 +99,14 @@ class Interfejs:
 
     def je_validna_pozicija_steka(self, pozicija, og):
         p = self.vrati_vrednost(self.letter_to_number(og[0]), int(og[1]))
-        #if p[8 - int(pozicija)] == self.trenutni_igrac or p[8 - int(pozicija)] == '.':
-        if pozicija.isdigit() and 0 <= int(pozicija) <= 7:
-                return True
+        if p[8 - int(pozicija)] == self.trenutni_igrac or p[8 - int(pozicija)] == '.':
+            if pozicija.isdigit() and 0 <= int(pozicija) <= 7:
+                   return True
+            else:
+                   return False
         else:
-                return False
-        #else:
-            #print("To nije vasa figura i ne mozete je pomeriti! Izaberite drugu!")
-            #return False
+            print("To nije vasa figura i ne mozete je pomeriti! Izaberite drugu!")
+            return False
 
     def je_validan_smer(self, smer, pozicija_polja):
         if (smer.upper() in {'GL', 'DL', 'GD', 'DD'}):
