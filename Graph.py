@@ -71,6 +71,9 @@ class Chessboard:
         # Skup za praćenje posećenih čvorova
         visited = set()
 
+        # Minimalna dužina pronađenih puteva
+        min_path_length = float('inf')
+
         # Lista za čuvanje svih najkraćih puteva
         shortest_paths = []
 
@@ -78,8 +81,15 @@ class Chessboard:
             current_key, current_path = queue.popleft()
 
             if current_key == end_key:
-                # Ako smo stigli do ciljnog čvora, dodajemo trenutni put u listu najkraćih puteva
-                shortest_paths.append(current_path)
+                # Ako smo stigli do ciljnog čvora
+                if len(current_path) < min_path_length:
+                    # Ako je dužina trenutnog puta manja od minimalne dužine
+                    min_path_length = len(current_path)
+                    shortest_paths = [current_path]
+                elif len(current_path) == min_path_length:
+                    # Ako je dužina puta jednaka minimalnoj dužini, dodajemo put u listu najkraćih puteva
+                    shortest_paths.append(current_path)
+                # Nastavljamo dalje kako bismo pronašli sve najkraće puteve
                 continue
 
             if current_key not in visited:
