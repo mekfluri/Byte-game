@@ -4,6 +4,7 @@ import string
 from collections import deque
 from Graph import Chessboard
 from HashTable import HashTable
+from InferenceEngine import InferenceEngine
 from User import User
 
 INFINITY = float('inf')
@@ -25,7 +26,27 @@ class Interfejs:
         self.user2 = None
         self.potezi = deque()
         self.matrica= []
+        self.vrednost_stanja = 0
+        self.inference_engine = InferenceEngine()
 
+        self.inference_engine.add_rule(self.pravilo_broj_stekova, self.pravilo_broj_stekova_action)
+        self.inference_engine.add_rule(self.pravilo_vrednost_stekova, self.pravilo_vrednost_stekova_action)
+
+
+
+    def pravilo_broj_stekova(self, facts):
+        #da moze da odigra da ima bar jednu figuru koju moze da pomeri
+        return "BrojStekova" in facts and int(facts["BrojStekova"]) >= 1
+
+    def pravilo_broj_stekova_action(self, facts):
+        #kad je na true znaci da je pravilo da ima bar jednu figuricu ispunjeno i mozed da se igra
+        facts["IgracImaViseStekova"] = True
+
+    def pravilo_vrednost_stekova(self, facts):
+        return "VrednostStekova" in facts and int(facts["VrednostStekova"]) >= 1
+
+    def pravilo_vrednost_stekova_action(self, facts):
+        facts["IgracImaVisokuVrednostStekova"] = True
 
     def dodaj_stanje(self, broj, stek):
         self.trenutno_stanje.set_val(broj, stek)
@@ -196,6 +217,8 @@ class Interfejs:
                 return i
     def unos_poteza(self):
         self.pozicija_polja = input("Unesite poziciju polja:").upper()
+        if self.pozicija_polja=="DALJE":
+            return 1
        # print("Ovo su svi moguci potezi, koje mozete odigrati")
 
       #  pozicije_igraca = self.vrati_pozicije_igraca()
@@ -249,7 +272,7 @@ class Interfejs:
                 print(' ', end=' ')
 
     def najblizi_element(self):
-        i = self.letter_to_number(self.pozicija_polja[0])
+        i = self.letter_to_number((self.pozicija_polja[0:1]).upper())
         j = int(self.pozicija_polja[1])
         element = self.vrati_stanje(i * 10 + j)
         # u element se nalazi polje koje zelimo da pomerim
@@ -295,12 +318,12 @@ class Interfejs:
                 if (p < len(listaJpozitivno)):
                     for o in range(indeks2, indeks3 + 1):
                         indeks = o * 10 + listaJpozitivno[p]
-                        print(indeks)
+                        #print(indeks)
                         element = self.vrati_stanje(indeks)
                         if (element != "PRAZNO" and element != deque(['.'] * 9) ):
                             najblizi_element.append([element, indeks, p])
                             fleg = True
-                        print(element)
+                        #print(element)
 
                 if (p < len(listaJnegativno)):
                     for o in range(indeks2, indeks3 + 1):
@@ -309,8 +332,8 @@ class Interfejs:
                         if (element != "PRAZNO" and element != deque(['.'] * 9)):
                             najblizi_element.append([element, indeks, p])
                             fleg = True
-                        print(element)
-                        print(indeks)
+                        #print(element)
+                        #print(indeks)
                 if (len(listaJnegativno) < p or len(listaJnegativno) == p):
                     indeks2 = 1
                 else:
@@ -327,8 +350,8 @@ class Interfejs:
                         if (element != "PRAZNO" and element != deque(['.'] * 9)):
                             najblizi_element.append([element, indeks, p])
                             fleg = True
-                        print(element)
-                        print(indeks)
+                        #print(element)
+                        #print(indeks)
 
                 if (p < len(listaIpozitivno)):
                     for o in range(indeks2 + 1, indeks3):
@@ -337,10 +360,10 @@ class Interfejs:
                         if (element != "PRAZNO" and  element != deque(['.'] * 9)):
                             najblizi_element.append([element, indeks, p])
                             fleg = True
-                        print(element)
-                        print(indeks)
+                        #print(element)
+                        #print(indeks)
             p = p + 1
-        print(najblizi_element)
+        #print(najblizi_element)
         return najblizi_element
 
     def kreiraj_tablu(self, velicina_table, graf):
@@ -368,13 +391,13 @@ class Interfejs:
             # vraca mi veci broj obicno je prvi taj koji je dobar
            shortest_paths = tabla.bfs_shortest_paths(start_key, end_key)
 
-           print(f"Najkraći putevi između {start_key} i {end_key}:")
+           #print(f"Najkraći putevi između {start_key} i {end_key}:")
 
            for path in shortest_paths:
                listaValidnih.append(path[1])
                #print(path[1])
-               print(" -> ".join(path))
-        print(listaValidnih)
+               #print(" -> ".join(path))
+        #print(listaValidnih)
         return  listaValidnih
 
     def spajanje_praznog_steka(self, polje1, polje2, indeks1, indeks2):
@@ -533,9 +556,11 @@ class Interfejs:
 
     def odigraj_potez(self):
         if self.trenutni_igrac == 'X':
-            if self.unos_poteza() != False:  # Provera da li je unos validan
+            potez = self.unos_poteza()
+            if potez != False:  # Provera da li je unos validan
+              if potez != 1:
                 susedna_polja = self.proveri_susedna_polja(self.pozicija_polja)
-                if len(susedna_polja[0]) == 4:
+                if len(susedna_polja[0]) == 4 or ((int(self.pozicija_polja[1])) == 8 and len(susedna_polja[0]) == 2):
                     listaValidnih = self.najkraci_put()
                     i = self.letter_to_number(self.pozicija_polja[0])
                     j = int(self.pozicija_polja[1])
@@ -583,6 +608,10 @@ class Interfejs:
 
                             #self.prikazi_stanje_igre()
                             return
+              else:
+                  self.trenutni_igrac = 'X' if self.trenutni_igrac == 'O' else 'O'
+                  return
+
             else:
                 print("Molimo unesite ispravan potez")
                 self.odigraj_potez()
@@ -606,7 +635,7 @@ class Interfejs:
             self.trenutni_igrac = 'X' if self.trenutni_igrac == 'O' else 'O'
             #self.prikazi_stanje_igre()
             return
-
+    '''
     def evaluate_board(self, board, player):
         # Broj stekova u vlasništvu igrača
         broj_stekova_igraca = 0
@@ -623,6 +652,53 @@ class Interfejs:
                     vrednost_stekova_igraca += len(row) - row.index(cell)  # Vrednost figure na steku
 
         return broj_stekova_igraca * 10 + vrednost_stekova_igraca  # Ponderisana vrednost
+    '''
+
+    def evaluate_board(self, board, player):
+        # Inicijalizacija činjenica koje opisuju trenutno stanje igre
+        facts = {
+            "BrojStekova": 0,
+            "VrednostStekova": 0,
+            "IgracImaViseStekova": False,
+            "IgracImaVisokuVrednostStekova": False
+        }
+
+        # Prolazak kroz tablu i računanje broja figurica i ukupne vrednosti stekova igrača
+        for row in board:
+            for cell in row:
+                for x in cell:
+                   if x == player:
+                      facts["BrojStekova"] += 1
+                      facts["VrednostStekova"] += len(row) - row.index(cell)
+
+        # Izvršavanje mehanizma zaključivanja
+        self.inference_engine.infer(facts)
+
+        # Proučavanje zaključaka i ažuriranje vrednosti stanja prema potrebi
+        self.vrednost_stanja = facts["BrojStekova"] * 10 + facts["VrednostStekova"]
+
+        if facts["IgracImaViseStekova"]:
+            # Dodajte odgovarajući uticaj na vrednost stanja
+            self.vrednost_stanja += 3 # Prilagodite NEKA_VREDNOST1 prema vašim potrebama
+
+        if facts["IgracImaVisokuVrednostStekova"]:
+            # Dodajte odgovarajući uticaj na vrednost stanja
+            self.vrednost_stanja += 4  # Prilagodite NEKA_VREDNOST2 prema vašim potrebama
+
+        # Vraćanje ažurirane vrednosti stanja
+        return self.vrednost_stanja
+
+    def pravilo_broj_stekova(self, facts):
+        if "BrojStekova" in facts:
+            broj_stekova = int(facts["BrojStekova"])
+            return broj_stekova >= 1
+        return False
+
+    def pravilo_vrednost_stekova(self, facts):
+        if "VrednostStekova" in facts:
+            vrednost_stekova = int(facts["VrednostStekova"])
+            return vrednost_stekova >= 3
+        return False
 
     def odaberi_najbolji_potez(self, igrac, tabla):
         najbolji_potez = None
@@ -712,14 +788,26 @@ class Interfejs:
         else:
             return cell_value
 
+    #ovde treba da dodamo poteze kad su svi susedi prazni
     def pronadji_moguce_poteze(self, tabla, pozicija, stek):
         #ovo treba da se promeni kad su svi susedi prazni sta se onda radi
         moguci_potezi = []
         x, y = pozicija
         if pozicija is not None:
+            susedi = []
             for sused in self.pronadji_susede(tabla, pozicija,stek):
-                sused_x, sused_y = sused
-                moguci_potezi.append((self.number_to_letter(sused_x).upper(), sused_y))
+               susedi.append(sused)
+               if sused is not None:
+                  sused_x, sused_y = sused
+                  moguci_potezi.append((self.number_to_letter(sused_x).upper(), sused_y))
+
+            if all(element is None for element in susedi):
+
+               self.pozicija_polja=self.number_to_letter(pozicija[0])+str(pozicija[1])
+               Putevi=self.najkraci_put()
+               for mesto in Putevi:
+                 moguci_potezi.append((mesto[0],mesto[1]))
+
             return moguci_potezi
         else:
             return moguci_potezi
@@ -782,60 +870,7 @@ class Interfejs:
 
         return matrica
 
-    def spajanje_stekova2(self, polje1, polje2, indeks1, indeks2, trenutno_stanje):
-        matrix_size = len(trenutno_stanje)  # Assuming trenutno_stanje is a matrix
-        row1, col1 = indeks1 // matrix_size, indeks1 % matrix_size
-        row2, col2 = indeks2 // matrix_size, indeks2 % matrix_size
 
-        while '.' in polje1:
-            polje1.remove('.')
-        while '.' in polje2:
-            polje2.remove('.')
-
-        visina_drugog_steka = len(polje2)
-        indeks = int(self.mesto_na_steku)
-
-        # Ensure indeks is an integer
-        indeks = int(indeks)
-
-        # Pajton koristi indeksiranje od 0
-        elementi_od_pocetka_do_mesta = list(polje1)[indeks:]
-
-        visina_steka_za_premestanje = len(elementi_od_pocetka_do_mesta)
-
-        if (visina_drugog_steka + visina_steka_za_premestanje > 8):
-            print("Rezultujuci stek ima vise od 8 elemenata potez nije validan")
-        else:
-            if (visina_drugog_steka > int(self.mesto_na_steku)):
-                for i, element in enumerate(reversed(elementi_od_pocetka_do_mesta)):
-                    row = row2 + i
-                    trenutno_stanje[row][col2] = element
-
-                duzinaPolja2 = len(polje2)
-                if duzinaPolja2 < 8:
-                    for i in range(0, 8 - duzinaPolja2):
-                        new_row = row2 + i + len(elementi_od_pocetka_do_mesta)
-                        if new_row < 8:  # Make sure not to exceed the valid row index
-                            trenutno_stanje[new_row][col2] = '.'
-
-                print(trenutno_stanje)
-
-                for i in range(len(elementi_od_pocetka_do_mesta)):
-                    row = row1 + i
-                    trenutno_stanje[row][col1] = '.'
-
-                duzinaPolja1 = len(polje1)
-                if duzinaPolja1 < 8:  # Assuming the matrix has 8 rows
-                    for i in range(0, 8 - duzinaPolja1):
-                        new_row = row1 + i + len(elementi_od_pocetka_do_mesta)
-                        if new_row < 8:
-                            trenutno_stanje[new_row][col1] = '.'
-
-                print(trenutno_stanje)
-
-                return trenutno_stanje
-            else:
-                print("Potez ne moze da se odigra, nije validan")
 
     def spajanje_stekova3(self, polje1, polje2, indeks1, indeks2):
         while '.' in polje1:
