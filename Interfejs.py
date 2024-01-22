@@ -447,6 +447,7 @@ class Interfejs:
         visina_steka_za_premestanje = len(elementi_od_pocetka_do_mesta)
         if (visina_drugog_steka + visina_steka_za_premestanje > 8):
             print("Rezultujuci stek ima vise od 8 elemenata potez nije validan")
+            return False
         else:
             if (visina_drugog_steka > int(self.mesto_na_steku)):
                 for element in reversed(elementi_od_pocetka_do_mesta):
@@ -539,10 +540,10 @@ class Interfejs:
         broj_stekova_user2 = user2.broj_slozenih_stekova(polje)
         if broj_pobednickih_stekova % 2 != 0:
             if broj_stekova_user1 > broj_pobednickih_stekova // 2:
-                print("Čestitamo! Pobedio je korisnik 'X'!")
+                print("Čestitamo! Pobedili ste! :)")
                 return True
             if broj_stekova_user2 > broj_pobednickih_stekova // 2:
-                print("Čestitamo! Pobedio je korisnik 'Y'!")
+                print("Pobedio je računar! :(")
                 return True
 
         return False
@@ -631,13 +632,20 @@ class Interfejs:
             indeks2 = broj_slova * 10 + broj
             vrednsot_steka1 = self.vrati_stanje(indeks1)
             vrednost_steka2 = self.vrati_stanje(indeks2)
-            self.spajanje_stekova(vrednost_steka2 , vrednsot_steka1, indeks2, indeks1)
+            if self.spajanje_stekova(vrednost_steka2 , vrednsot_steka1, indeks2, indeks1) == False:
+                vrednsot_steka1 = self.vrati_stanje(indeks1)
+                vrednost_steka2 = self.vrati_stanje(indeks2)
+                if vrednsot_steka1 == deque(['.'] * 9):
+                    self.spajanje_praznog_steka(vrednsot_steka1, vrednost_steka2, indeks1, indeks2)
+                else:
+                    self.spajanje_praznog_steka(vrednost_steka2, vrednsot_steka1, indeks2, indeks1)
+
             self.trenutni_igrac = 'X' if self.trenutni_igrac == 'O' else 'O'
             #self.prikazi_stanje_igre()
             return
     '''
     def evaluate_board(self, board, player):
-        # Broj stekova u vlasništvu igrača
+        # Broj stekova u vlasništvu igrač
         broj_stekova_igraca = 0
         for row in board:
             for cell in row:
@@ -716,47 +724,54 @@ class Interfejs:
                 self.pozicija_polja=potez[2]
                 novo_stanje = self.novo_stanje_na_osnovu_poteza( potez[0])
                 vrednost_poteza = self.minimax_alphabeta(novo_stanje, dubina - 1, not igrac == 'O', float('-inf'),float('inf'))
-
-                if igrac == 'O' and vrednost_poteza > vrednost_najboljeg_poteza:
-                    vrednost_najboljeg_poteza = vrednost_poteza
-                    najbolji_potez = potez
-                elif igrac == 'X' and vrednost_poteza < vrednost_najboljeg_poteza:
-                    vrednost_najboljeg_poteza = vrednost_poteza
-                    najbolji_potez = potez
+                if vrednost_poteza is not None:
+                    if igrac == 'O' and vrednost_poteza > vrednost_najboljeg_poteza:
+                        vrednost_najboljeg_poteza = vrednost_poteza
+                        najbolji_potez = potez
+                    elif igrac == 'X' and vrednost_poteza < vrednost_najboljeg_poteza:
+                        vrednost_najboljeg_poteza = vrednost_poteza
+                        najbolji_potez = potez
 
         return najbolji_potez
 
     def minimax_alphabeta(self, node, depth, maximizing_player, alpha, beta):
-        if depth == 0:
-            return self.evaluate_board(node, 'O')
+      if node is not False:
+            if node is not None:
+                if depth == 0:
+                    return self.evaluate_board(node, 'O')
 
-        pozicije_igraca = self.vrati_pozicije_igraca()
+            pozicije_igraca = self.vrati_pozicije_igraca()
 
-        for pozicija in pozicije_igraca:
-            moguci_potezi = self.moguci_potezi_igraca(node, pozicija[0], pozicija[1])
+            for pozicija in pozicije_igraca:
+                moguci_potezi = self.moguci_potezi_igraca(node, pozicija[0], pozicija[1])
 
-            if maximizing_player:
-                max_eval = float('-inf')
-                for child_state in moguci_potezi:
-                    self.pozicija_polja = child_state[2]
-                    novo_stanje = self.novo_stanje_na_osnovu_poteza(child_state[0])
-                    eval = self.minimax_alphabeta(novo_stanje, depth - 1, False, alpha, beta)
-                    max_eval = max(max_eval, eval)
-                    alpha = max(alpha, eval)
-                    if beta <= alpha:
-                        break
-                return max_eval
-            else:
-                min_eval = float('inf')
-                for child_state in moguci_potezi:
-                    self.pozicija_polja = child_state[2]
-                    novo_stanje = self.novo_stanje_na_osnovu_poteza(child_state[0])
-                    eval = self.minimax_alphabeta(novo_stanje, depth - 1, True, alpha, beta)
-                    min_eval = min(min_eval, eval)
-                    beta = min(beta, eval)
-                    if beta <= alpha:
-                        break
-                return min_eval
+                if maximizing_player:
+                    max_eval = float('-inf')
+                    for child_state in moguci_potezi:
+                        self.pozicija_polja = child_state[2]
+                        novo_stanje = self.novo_stanje_na_osnovu_poteza(child_state[0])
+                        eval = self.minimax_alphabeta(novo_stanje, depth - 1, False, alpha, beta)
+                        if eval is not None:
+                            max_eval = max(max_eval, eval)
+                            alpha = max(alpha, eval)
+                            if beta <= alpha:
+                                break
+                        else: break
+                    return max_eval
+                else:
+                    min_eval = float('inf')
+                    for child_state in moguci_potezi:
+                        self.pozicija_polja = child_state[2]
+                        novo_stanje = self.novo_stanje_na_osnovu_poteza(child_state[0])
+                        eval = self.minimax_alphabeta(novo_stanje, depth - 1, True, alpha, beta)
+                        if eval is not None:
+                            min_eval = min(min_eval, eval)
+                            beta = min(beta, eval)
+                            if beta <= alpha:
+                                break
+                        else: break
+                    return min_eval
+
 
     def generisi_dubinu_pretrazivanja(self):
         if self.velicina_table <= 8:
@@ -884,7 +899,7 @@ class Interfejs:
         elementi_od_pocetka_do_mesta = (list(polje1)[indeks:])
         visina_steka_za_premestanje = len(elementi_od_pocetka_do_mesta)
         if (visina_drugog_steka + visina_steka_za_premestanje > 8):
-            print("Rezultujuci stek ima vise od 8 elemenata potez nije validan")
+            return False
         else:
             if (visina_drugog_steka > int(self.mesto_na_steku)):
                 for element in reversed(elementi_od_pocetka_do_mesta):
