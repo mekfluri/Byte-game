@@ -442,7 +442,6 @@ class Interfejs:
         visina_drugog_steka = len(polje2)
 
         indeks = int(self.mesto_na_steku)
-        # pajton koristi indeksiranje od 0
         elementi_od_pocetka_do_mesta = (list(polje1)[indeks:])
         visina_steka_za_premestanje = len(elementi_od_pocetka_do_mesta)
         if (visina_drugog_steka + visina_steka_za_premestanje > 8):
@@ -557,7 +556,7 @@ class Interfejs:
     def odigraj_potez(self):
         if self.trenutni_igrac == 'X':
             potez = self.unos_poteza()
-            if potez != False:  # Provera da li je unos validan
+            if potez != False:
               if potez != 1:
                 susedna_polja = self.proveri_susedna_polja(self.pozicija_polja)
                 if len(susedna_polja[0]) == 4 or ((int(self.pozicija_polja[1])) == 8 and len(susedna_polja[0]) == 2):
@@ -663,7 +662,7 @@ class Interfejs:
             "IgracImaVisokuVrednostStekova": False
         }
 
-        # Prolazak kroz tablu i računanje broja figurica i ukupne vrednosti stekova igrača
+
         for row in board:
             for cell in row:
                 for x in cell:
@@ -671,21 +670,21 @@ class Interfejs:
                       facts["BrojStekova"] += 1
                       facts["VrednostStekova"] += len(row) - row.index(cell)
 
-        # Izvršavanje mehanizma zaključivanja
+
         self.inference_engine.infer(facts)
 
-        # Proučavanje zaključaka i ažuriranje vrednosti stanja prema potrebi
+
         self.vrednost_stanja = facts["BrojStekova"] * 10 + facts["VrednostStekova"]
 
         if facts["IgracImaViseStekova"]:
-            # Dodajte odgovarajući uticaj na vrednost stanja
-            self.vrednost_stanja += 3 # Prilagodite NEKA_VREDNOST1 prema vašim potrebama
+
+            self.vrednost_stanja += 3
 
         if facts["IgracImaVisokuVrednostStekova"]:
-            # Dodajte odgovarajući uticaj na vrednost stanja
-            self.vrednost_stanja += 4  # Prilagodite NEKA_VREDNOST2 prema vašim potrebama
 
-        # Vraćanje ažurirane vrednosti stanja
+            self.vrednost_stanja += 4
+
+
         return self.vrednost_stanja
 
     def pravilo_broj_stekova(self, facts):
@@ -704,7 +703,7 @@ class Interfejs:
         najbolji_potez = None
         vrednost_najboljeg_poteza = float('-inf') if igrac == 'O' else float('inf')
 
-        # Generisi dubinu pretraživanja na osnovu veličine table
+
         dubina = self.generisi_dubinu_pretrazivanja()
 
         pozicije_igraca = self.vrati_pozicije_igraca()
@@ -712,7 +711,7 @@ class Interfejs:
         for pozicija in pozicije_igraca:
             moguci_potezi = self.moguci_potezi_igraca(self.vrati_tablu(), pozicija[0], pozicija[1])
             for potez in moguci_potezi:
-                # Ispravljen poziv funkcije:
+
                 self.pozicija_polja=potez[2]
                 novo_stanje = self.novo_stanje_na_osnovu_poteza( potez[0])
                 vrednost_poteza = self.minimax_alphabeta(novo_stanje, dubina - 1, not igrac == 'O', float('-inf'),float('inf'))
@@ -788,9 +787,8 @@ class Interfejs:
         else:
             return cell_value
 
-    #ovde treba da dodamo poteze kad su svi susedi prazni
+
     def pronadji_moguce_poteze(self, tabla, pozicija, stek):
-        #ovo treba da se promeni kad su svi susedi prazni sta se onda radi
         moguci_potezi = []
         x, y = pozicija
         if pozicija is not None:
